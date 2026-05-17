@@ -5,7 +5,7 @@ export const announcementConfig: AnnouncementConfig = {
 	title: "公告",
 
 	// 公告内容
-	content: "<p>欢迎光临我的博客 🎉</p><p>这里会分享我的日常和学习中的收集、整理及总结，希望能对你有所帮助:) 💖</p><p><img src=/assets/images/tips.gif style=width:100%></p>",
+	content: "欢迎光临我的博客 🎉这里会分享我的日常和学习中的收集、整理及总结，希望能对你有所帮助:) 💖",
 
 	// 是否允许用户关闭公告
 	closable: true,
