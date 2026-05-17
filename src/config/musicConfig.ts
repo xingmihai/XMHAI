@@ -57,7 +57,7 @@ export const musicPlayerConfig: MusicPlayerConfig = {
 				lrc: "",
 			},
 			{
-				name: "登",
+				name: "等",
 				artist: "小小宇",
 				url: "/assets/music/小小宇-哼唱.mp3",
 				cover: "/assets/music/cover/688407e3df3dd7b7713aad35f67072471779048601135.jpg",
