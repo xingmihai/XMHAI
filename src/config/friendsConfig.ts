@@ -37,7 +37,7 @@ export const friendsConfig: FriendLink[] = [
 		imgurl: "http://img.magicalapp.cn/api/image/show/21dc2a2308c039d958fabf4815594f42",
 		desc: "一起分享，共同进步",
 		siteurl: "https://blog.xiaow.qzz.io",
-		tags: ["blog"],
+		tags: ["Blog"],
 		weight: 9,
 		enabled: true,
 	},
