@@ -54,6 +54,8 @@ export const en: Translation = {
 	[Key.friends]: "Friends",
 	[Key.friendsDescription]:
 		"Here are my friends, welcome to visit and communicate with each other",
+	[Key.searchFriends]: "Search friends...",
+	[Key.friendsEmpty]: "No friends yet.",
 	[Key.guestbook]: "Guestbook",
 	[Key.guestbookDescription]:
 		"Welcome to leave your mark here, share your thoughts and suggestions",
@@ -122,6 +124,9 @@ export const en: Translation = {
 	[Key.bangumiEmpty]: "No Data",
 	[Key.bangumiEmptyReason]:
 		"Possible reasons: username does not exist, network connection issue, or API limit",
+	[Key.bangumiFetchError]: "Bangumi Data Fetch Failed",
+	[Key.bangumiFetchErrorDesc]:
+		"Failed to fetch data from Bangumi API during build. This page is temporarily unavailable.",
 	[Key.bangumiUsername]: "Username",
 	[Key.bangumiApi]: "API",
 	[Key.bangumiConfigTip]:
@@ -313,6 +318,7 @@ export const en: Translation = {
 	[Key.galleryAlbums]: "albums",
 	[Key.galleryNoAlbums]: "No albums yet",
 	[Key.galleryBackToAlbums]: "Back to albums",
+	[Key.searchAlbums]: "Search albums...",
 
 	// Password Protection
 	[Key.passwordProtected]: "Password Protected",

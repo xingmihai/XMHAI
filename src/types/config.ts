@@ -119,9 +119,10 @@ export type SiteConfig = {
 		umamiAnalytics?: {
 			websiteId?: string; // Umami Website ID
 			scriptUrl?: string; // Umami JS地址，支持使用自建
+			replaysScriptUrl?: string; // Umami 会话回放脚本地址
 			trackOutboundLinks?: boolean; // 是否追踪出站链接点击事件，默认 true
 			collectWebVitals?: boolean; // 是否自动收集访客浏览器核心网页指标，默认 false
-			relpays?: {
+			replays?: {
 				enabled?: boolean; // 是否启用会话回放，默认 false
 				sampleRate?: number; // 录制会话采样率，范围 0-1，默认 0.15
 				maskLevel?: "moderate" | "strict"; // 隐私遮罩级别，默认 moderate
@@ -529,8 +530,8 @@ export type Live2DWidgetConfig = {
 				path: string;
 				volume?: number;
 				scale?: number;
-				x?: number;
-				y?: number;
+				x?: number; // X轴偏移，范围 -2~2，正值向右
+				y?: number; // Y轴偏移，范围 -2~2，正值向上
 		  }[]; // 模型配置，支持单个或多个模型
 	position?: "bottom-left" | "bottom-right"; // 显示位置，默认 "bottom-left"
 	size?: number | { width: number; height: number }; // 画布尺寸（px），默认 300
@@ -774,6 +775,7 @@ export type SponsorMethod = {
 // 赞助者列表项
 export type SponsorItem = {
 	name: string; // 赞助者名称，如果想显示匿名，可以直接设置为"匿名"或使用 i18n
+	avatar?: string; // 赞助者头像图片路径(可选,相对于 public 目录 或者 网络图片)
 	amount?: string; // 赞助金额（可选）
 	date?: string; // 赞助日期（可选，ISO 格式）
 };
