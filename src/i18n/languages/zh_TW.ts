@@ -17,8 +17,8 @@ export const zh_TW: Translation = {
 
 	[Key.tags]: "標籤",
 	[Key.categories]: "分類",
-	[Key.allCategories]: "所有分類",
-	[Key.allTags]: "所有標籤",
+	[Key.allCategories]: "全部分類",
+	[Key.allTags]: "全部標籤",
 	[Key.recentPosts]: "最新文章",
 	[Key.postList]: "文章列表",
 	[Key.tableOfContents]: "文章目錄",
@@ -69,6 +69,8 @@ export const zh_TW: Translation = {
 	[Key.minutesCount]: "分鐘",
 	[Key.postCount]: "篇文章",
 	[Key.postsCount]: "篇文章",
+	[Key.tagsCount]: "個標籤",
+	[Key.noData]: "暫無資料",
 
 	[Key.themeColor]: "主題色相",
 
@@ -272,6 +274,20 @@ export const zh_TW: Translation = {
 	[Key.siteStatsDays]: "{days} 天",
 	[Key.today]: "今天",
 
+	// 站點資訊
+	[Key.siteInfo]: "站點資訊",
+	[Key.siteInfoBuildTime]: "構建時間",
+	[Key.siteInfoBuildPlatform]: "構建平台",
+	[Key.siteInfoBlogVersion]: "部落格版本",
+	[Key.siteInfoAstroVersion]: "Astro",
+	[Key.siteInfoNodeVersion]: "Node",
+	[Key.siteInfoPnpmVersion]: "pnpm",
+	[Key.siteInfoSystem]: "系統資訊",
+	[Key.siteInfoExpand]: "展開構建資訊",
+	[Key.siteInfoCollapse]: "收起構建資訊",
+	[Key.siteInfoDomain]: "站點域名",
+	[Key.siteInfoLicense]: "文章許可",
+
 	// 日曆組件
 	[Key.calendarSunday]: "日",
 	[Key.calendarMonday]: "一",
@@ -294,6 +310,7 @@ export const zh_TW: Translation = {
 	[Key.calendarDecember]: "12月",
 	[Key.calendar]: "站點日曆",
 	[Key.calendarHeatmapWeek]: "{month}月第{week}週，{count}篇文章",
+	[Key.advertisement]: "廣告",
 
 	[Key.shareArticle]: "分享",
 	[Key.generatingPoster]: "海報生成中...",
