@@ -12,11 +12,11 @@ export const siteConfig: SiteConfig = {
 	subtitle: "blog",
 
 	// 站点 URL
-	site_url: "https://xmhai.xmhai.cn",
+	site_url: "https://www.xmhai.cn",
 
 	// 站点描述
 	description:
-		"星觅海博客 是一款基于 Astro 框架和 Fuwari 模板开发的清新美观且现代化个人博客主题模板，专为技术爱好者和内容创作者设计。该主题融合了现代 Web 技术栈，提供了丰富的功能模块和高度可定制的界面，让您能够轻松打造出专业且美观的个人博客网站。",
+		"欢迎光临我的博客 🎉 这里会分享我的日常和学习中的收集、整理及总结，希望能对你有所帮助:) 💖",
 
 	// 站点关键词
 	keywords: [
@@ -27,6 +27,10 @@ export const siteConfig: SiteConfig = {
 		"博客",
 		"技术博客",
 		"静态博客",
+		"星觅海",
+		"星觅海得博客",
+		"xingmihai",
+		"xmhai"
 	],
 
 	// 主题色
@@ -73,9 +77,11 @@ export const siteConfig: SiteConfig = {
 		// 3. 本地图片（src目录，自动优化但会增加构建时间）: { type: "image", value: "assets/images/logo.webp", alt: "Logo" }
 		// 4. 网络图片: { type: "url", value: "https://example.com/logo.png", alt: "Logo" }
 		logo: {
-			type: "image",
-			value: "assets/images/firefly.png",
-			alt: "🍀",
+			type: "icon",
+			value: "material-symbols:home-pin-outline",
+//type: "image",
+//value: "assets/images/firefly.png",
+//alt: "🍀",
 		},
 		// 导航栏标题
 		title: "星觅海",
@@ -132,7 +138,7 @@ export const siteConfig: SiteConfig = {
 		// 网格布局配置，仅在 defaultMode 为 "grid" 或允许切换布局时生效
 		grid: {
 			// 是否开启瀑布流布局，同时有封面图和无封面图的混合文章推荐开启
-			masonry: false,
+			masonry: true,
 			// 网格模式卡片最小宽度(px)，浏览器根据容器宽度自动计算列数
 			columnWidth: 320,
 		},
