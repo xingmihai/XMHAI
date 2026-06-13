@@ -1,4 +1,4 @@
 User-agent: *
 Disallow: /_astro/
 
-Sitemap: https://xmhai.xmhai.cn/sitemap-index.xml
+Sitemap: https://www.xmhai.cn/sitemap-index.xml
