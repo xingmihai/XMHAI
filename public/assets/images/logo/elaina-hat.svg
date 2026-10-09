@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="192" height="192" viewBox="0 5 192 192">
+  <defs>
+    <linearGradient id="hat" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FDFBFF"/>
+      <stop offset="52%" stop-color="#DCD5F2"/>
+      <stop offset="100%" stop-color="#B3A7D6"/>
+    </linearGradient>
+    <linearGradient id="ribbon" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F9DC80"/>
+      <stop offset="50%" stop-color="#EFC24B"/>
+      <stop offset="100%" stop-color="#D3A02C"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 宽帽檐 -->
+  <ellipse cx="96" cy="145" rx="78" ry="15" fill="url(#hat)" stroke="#4A3C74" stroke-width="3"/>
+
+  <!-- 帽冠：锥形收窄，尖顶向右微弯 -->
+  <path d="M46,143 C58,117 70,91 78,70 C86,54 96,44 108,42 C120,41 126,52 121,66 C116,82 112,102 118,122 C124,136 136,140 146,143 Z"
+        fill="url(#hat)" stroke="#4A3C74" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- 金色丝带 -->
+  <path d="M53,127 C78,135 114,135 139,127 L142,141 C114,148 78,148 50,141 Z"
+        fill="url(#ribbon)" stroke="#8A6412" stroke-width="2.5" stroke-linejoin="round"/>
+
+  <!-- 丝带蝴蝶结 -->
+  <path d="M127,134 C136,125 146,126 147,134 C146,143 136,144 127,134 Z"
+        fill="url(#ribbon)" stroke="#8A6412" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M127,134 C118,125 108,126 107,134 C108,143 118,144 127,134 Z"
+        fill="url(#ribbon)" stroke="#8A6412" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="127" cy="134" r="6" fill="#EFC24B" stroke="#8A6412" stroke-width="2.5"/>
+</svg>

@@ -112,8 +112,8 @@ export const siteConfig: SiteConfig = {
 		logo: {
 			type: "image",
 			value: "assets/images/logo/firefly-light.png",
-			valueDark: "assets/images/logo/firefly-dark.png",
-			alt: "🍀",
+			valueDark: "/assets/images/logo/elaina-hat.svg",
+			alt: "🧙‍♀️",
 		},
 		// 导航栏标题
 		title: "星觅海",
