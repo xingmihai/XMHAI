@@ -10,5 +10,11 @@
 		"language": "Astro",
 		"avatarUrl": "https://avatars.githubusercontent.com/u/25200299?v=4",
 		"license": "MIT"
+	},
+	"xingmihai/gh-imgbed": {
+		"description": "GH图床 —— 基于 GitHub 存储与 Cloudflare 边缘缓存的免费图床",
+		"language": "JavaScript",
+		"avatarUrl": "https://avatars.githubusercontent.com/u/69405366?v=4",
+		"license": "MIT"
 	}
 }
