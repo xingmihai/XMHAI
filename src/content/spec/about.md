@@ -27,10 +27,6 @@
 
 ::github{repo="saicaca/fuwari"}
 
-顺带一提，图片托管用的是我自己写的 [GH-ImgBed](https://github.com/xingmihai/gh-imgbed)：图片存在 GitHub 仓库，经 Cloudflare 边缘节点分发。数据在自己手里，链接也不会因为哪天服务关停而失效。
-
-::github{repo="xingmihai/gh-imgbed"}
-
 ## 📮 联系我
 
 - GitHub：[xingmihai](https://github.com/xingmihai)
