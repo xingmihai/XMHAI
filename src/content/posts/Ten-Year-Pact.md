@@ -6,7 +6,7 @@ description: 从 2026 年 6 月 14 日到 2036 年 6 月 14 日，一张会随�
 image: /assets/images/ten_year_promise.svg
 tags: [十年之约]
 category: 十年之约
-pinned: true
+pinned: false
 ---
 
 ## 十年之约
