@@ -6,6 +6,7 @@ import I18nKey from "@/i18n/i18nKey";
 import { i18n } from "@/i18n/translation";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
 import "@/styles/pages/common.css";
+import { getLqipProps } from "@/utils/lqip-utils";
 import { url } from "@/utils/url-utils";
 import "@/styles/pages/sponsor.css";
 
@@ -27,6 +28,10 @@ const enabledMethods = sponsorConfig.methods.filter((method) => method.enabled);
 const sponsors = sponsorConfig.sponsors || [];
 const showSponsorsList = sponsorConfig.showSponsorsList !== false;
 
+// LQIP 渐变占位
+function getQrLqipProps(qrCode: string) {
+	return getLqipProps(qrCode, undefined, true);
+}
 ---
 
 <MainGridLayout title={title} description={description}>
@@ -81,11 +86,12 @@ const showSponsorsList = sponsorConfig.showSponsorsList !== false;
                         <!-- 二维码或链接 -->
                         {method.qrCode && (
                           <div class="relative w-full max-w-[200px] aspect-square bg-white rounded-lg p-4 shadow-md mb-4 overflow-hidden">
+                            <div class="lqip-placeholder absolute inset-0 rounded-lg pointer-events-none" style={getQrLqipProps(method.qrCode).style} aria-hidden="true"></div>
                             <img
                               src={url(method.qrCode)}
                               alt={`${method.name} ${i18n(I18nKey.scanToSponsor)}`}
-                              class="sponsor-qr relative w-full h-full object-contain"
-                              loading="eager"
+                              class="relative w-full h-full object-contain opacity-0 transition-opacity duration-500 ease-out"
+                              loading="lazy"
                             />
                           </div>
                         )}
@@ -197,21 +203,5 @@ const showSponsorsList = sponsorConfig.showSponsorsList !== false;
     background-color: oklch(from var(--primary) l c h / 0.15) !important;
   }
 </style>
-
-<script is:inline>
-  // 矢量收款码若加载失败，回退到同名的 PNG 位图
-  function initSponsorQrFallback() {
-    document.querySelectorAll("img.sponsor-qr").forEach((img) => {
-      if (img.dataset.qrFallback) return;
-      img.dataset.qrFallback = "1";
-      img.addEventListener("error", () => {
-        const png = img.getAttribute("src").replace(/\.svg$/, ".png");
-        if (png !== img.getAttribute("src")) img.setAttribute("src", png);
-      });
-    });
-  }
-  initSponsorQrFallback();
-  document.addEventListener("astro:page-load", initSponsorQrFallback);
-</script>
 
 
