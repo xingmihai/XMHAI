@@ -26,13 +26,13 @@ const pages = resolvePageToggles({
 	// 书签导航页面开关
 	booknav: true,
 	// 哔哩哔哩追番页面开关
-	bilibili: true,
+	bilibili: false,
 	// 番组计划页面开关
-	bangumi: true,
+	bangumi: false,
 	// VNDB页面开关
-	vndb: true,
+	vndb: false,
 	// MyAnimeList页面开关
-	mal: true,
+	mal: false,
 
 	// ── 关于 (About) ──────────────────────────────────
 
