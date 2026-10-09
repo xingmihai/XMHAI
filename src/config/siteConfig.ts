@@ -48,7 +48,7 @@ export const siteConfig: SiteConfig = {
 	subtitle: "记录生活与技术的小站",
 
 	// 站点 URL
-	site_url: "https://www.xmhai.cn",
+	site_url: "https://www.5al.top",
 
 	// 站点描述
 	description:

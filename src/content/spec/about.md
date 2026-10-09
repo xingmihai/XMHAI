@@ -4,7 +4,7 @@
 
 ## 🛠️ 关于本站
 
-域名：[xmhai.cn](https://www.xmhai.cn)
+域名：[www.5al.top](https://www.5al.top)
 
 本站使用 **Astro** 框架构建，采用了 [Firefly](https://github.com/CuteLeaf/Firefly) 主题，Firefly 是基于 [Fuwari](https://github.com/saicaca/fuwari) 的二次开发。
 
