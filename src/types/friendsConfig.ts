@@ -7,6 +7,7 @@ export type FriendLink = {
 	tags?: string[]; // 标签数组
 	weight: number; // 权重，数字越大排序越靠前
 	enabled: boolean; // 是否启用
+	rss?: string; // RSS/Atom 订阅源地址（可选，供圈子页面抓取该站的最新文章）
 };
 
 export type FriendsPageConfig = {

@@ -1,0 +1,75 @@
+/* 圈子页面样式 */
+
+/* 订阅源标签 */
+.circle-source-chip {
+  border: 1px solid var(--line-divider);
+  color: var(--text-light, #6b7280);
+}
+
+.circle-source-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.circle-source-avatar {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+/* 文章列表 */
+.circle-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.circle-item {
+  border-bottom: 1px solid var(--line-divider);
+}
+
+.circle-item:last-child {
+  border-bottom: none;
+}
+
+.circle-item:hover {
+  background-color: var(--card-bg);
+}
+
+.circle-item-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 1px solid var(--line-divider);
+}
+
+.circle-item-avatar--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--card-bg);
+  color: var(--primary);
+}
+
+.circle-item-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-main, #171717);
+  line-height: 1.5;
+}
+
+:root.dark .circle-item-title {
+  color: #f5f5f5;
+}
+
+/* 失败提示 */
+.circle-failures summary::-webkit-details-marker {
+  display: none;
+}
+
+.circle-failures summary {
+  list-style: none;
+}

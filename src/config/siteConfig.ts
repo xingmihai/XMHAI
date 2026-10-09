@@ -14,6 +14,8 @@ const pages = resolvePageToggles({
 	friends: true,
 	// 留言板页面开关，需要配置评论系统
 	guestbook: true,
+	// 圈子页面开关（聚合友链 RSS 文章）
+	circle: true,
 
 	// ── 我的 (My) ──────────────────────────────────
 

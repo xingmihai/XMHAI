@@ -47,6 +47,9 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 
 			// 留言
 			LinkPresets.Guestbook,
+
+			// 圈子
+			LinkPresets.Circle,
 		],
 	});
 
@@ -169,6 +172,12 @@ export const LinkPresets: Record<string, NavBarLink> = {
 		url: "/guestbook/",
 		icon: "material-symbols:chat",
 		pageKey: "guestbook",
+	},
+	Circle: {
+		name: "圈子",
+		url: "/circle/",
+		icon: "material-symbols:rss-feed-rounded",
+		pageKey: "circle",
 	},
 	Dynamic: {
 		name: "动态",

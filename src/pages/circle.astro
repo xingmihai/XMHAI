@@ -1,0 +1,171 @@
+---
+import { Icon } from "astro-icon/components";
+import { circleConfig, getEnabledCircleSources, siteConfig } from "@/config";
+import MainGridLayout from "@/layouts/MainGridLayout.astro";
+import type { CircleItem } from "@/types/circleConfig";
+import { fetchAllSources } from "@/utils/rss-parser";
+import "@/styles/pages/common.css";
+import "@/styles/pages/circle.css";
+
+// 检查页面是否启用
+if (!siteConfig.pages.circle) {
+	return Astro.redirect("/404/");
+}
+
+const title = circleConfig.title || "圈子";
+const description =
+	circleConfig.description || "朋友们最近写下的东西，由订阅源自动汇总。";
+
+// 构建时抓取所有订阅源
+const sources = getEnabledCircleSources();
+
+// 抓取失败不应导致整站构建中断，这里做一层兜底
+let items: CircleItem[] = [];
+let failures: { name: string; error: string }[] = [];
+try {
+	const result = await fetchAllSources(sources, {
+		timeout: circleConfig.timeout,
+		limitPerSource: circleConfig.limitPerSource,
+		totalLimit: circleConfig.totalLimit,
+	});
+	items = result.items;
+	failures = result.failures;
+} catch (error) {
+	console.error("[Circle] 抓取订阅源失败:", error);
+	failures = [{ name: "全部订阅源", error: "抓取过程出现异常" }];
+}
+
+// 把日期格式化成 YYYY-MM-DD，解析失败则返回空
+function formatDate(item: CircleItem): string {
+	if (!item.timestamp) return "";
+	const d = new Date(item.timestamp);
+	const pad = (n: number) => String(n).padStart(2, "0");
+	return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+---
+
+<MainGridLayout title={title} description={description}>
+  <div
+    class="flex w-full rounded-(--radius-large) overflow-hidden relative min-h-32"
+  >
+    <div class="card-base z-10 px-9 py-6 relative w-full">
+      <!-- 页面标题和描述 -->
+      <div class="mb-6">
+        <div class="page-heading">
+          <div class="page-icon" aria-hidden="true">
+            <Icon name="material-symbols:rss-feed-rounded" />
+          </div>
+          <div>
+            <h2>{title}</h2>
+            {description && <p>{description}</p>}
+          </div>
+        </div>
+      </div>
+
+      <!-- 订阅源概览 -->
+      {
+        sources.length > 0 && (
+          <div class="flex flex-wrap items-center gap-2 mb-5">
+            <span class="text-sm text-neutral-500 dark:text-neutral-400">
+              已订阅 {sources.length} 个站点
+            </span>
+            {sources.map((source) => (
+              <a
+                href={source.site}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="circle-source-chip inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs transition-colors duration-200"
+              >
+                {source.avatar ? (
+                  <img
+                    src={source.avatar}
+                    alt={source.name}
+                    class="circle-source-avatar"
+                  />
+                ) : (
+                  <Icon name="material-symbols:rss-feed-rounded" class="text-xs" />
+                )}
+                <span>{source.name}</span>
+              </a>
+            ))}
+          </div>
+        )
+      }
+
+      <!-- 文章列表 -->
+      {
+        items.length > 0 ? (
+          <div class="circle-list">
+            {items.map((item) => (
+              <a
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="circle-item group flex items-start gap-3 py-3.5 px-3 -mx-3 rounded-xl transition-all duration-200"
+              >
+                {item.sourceAvatar ? (
+                  <img
+                    src={item.sourceAvatar}
+                    alt={item.sourceName}
+                    class="circle-item-avatar"
+                  />
+                ) : (
+                  <div class="circle-item-avatar circle-item-avatar--placeholder">
+                    <Icon name="material-symbols:rss-feed-rounded" />
+                  </div>
+                )}
+
+                <div class="grow min-w-0">
+                  <div class="circle-item-title group-hover:text-(--primary) transition-colors duration-200 line-clamp-2">
+                    {item.title}
+                  </div>
+                  <div class="flex items-center gap-2 mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                    <span class="truncate max-w-[14rem]">{item.sourceName}</span>
+                    {formatDate(item) && (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <time class="shrink-0">{formatDate(item)}</time>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <Icon
+                  name="material-symbols:arrow-outward-rounded"
+                  class="shrink-0 text-base text-(--primary) opacity-0 group-hover:opacity-100 transition-opacity duration-200 mt-0.5"
+                />
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div class="flex flex-col items-center justify-center py-14 text-neutral-400 dark:text-neutral-500">
+            <Icon name="material-symbols:rss-feed-rounded" class="text-4xl mb-3" />
+            <div class="text-sm">还没有抓到任何文章</div>
+            <div class="text-xs mt-1.5 opacity-70">
+              在友链配置里给站点填上 rss 地址，或在 circleConfig 里手动添加订阅源
+            </div>
+          </div>
+        )
+      }
+
+      <!-- 抓取失败的站点提示 -->
+      {
+        failures.length > 0 && (
+          <details class="circle-failures mt-6 text-xs">
+            <summary class="cursor-pointer text-neutral-500 dark:text-neutral-400 hover:text-(--primary) transition-colors duration-200">
+              {failures.length} 个站点未能抓到内容
+            </summary>
+            <ul class="mt-2 space-y-1 pl-1">
+              {failures.map((f) => (
+                <li class="text-neutral-400 dark:text-neutral-500">
+                  <span class="font-medium">{f.name}</span>
+                  <span class="opacity-70"> — {f.error}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )
+      }
+    </div>
+  </div>
+</MainGridLayout>
