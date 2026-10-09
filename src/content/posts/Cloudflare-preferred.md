@@ -3,7 +3,7 @@ title: Cloudflare 优选 IP 教程
 published: 2025-10-24T00:00:00+08:00
 draft: false
 description: 用两个托管在 Cloudflare 的域名配合自定义主机名做优选 IP，附多站点配置方法。
-image: https://dash.cloudflare.com/favicon-196x196.png
+image: https://dash.cloudflare.com/favicons/favicon.ico
 tags: [Cloudflare, 教程]
 category: ""
 pinned: false
