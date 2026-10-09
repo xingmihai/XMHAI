@@ -1,0 +1,7 @@
+# 伊蕾娜相册图片 URL 列表
+# 每行一个图片链接，支持 jpg/png/webp/avif/gif 格式
+# 以 # 开头的行为注释，会被忽略
+https://img.5al.top/v2/261009-zanhz.jpg
+https://img.5al.top/v2/261009-79pn8.jpg
+https://img.5al.top/v2/261009-m3z9n.avif
+https://img.5al.top/v2/261009-xr47b.avif
