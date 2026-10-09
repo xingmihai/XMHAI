@@ -12,7 +12,7 @@ export const profileConfig: ProfileConfig = {
 	name: "星觅海",
 
 	// 个人签名
-	bio: "折腾 Cloudflare、自建服务，记录生活里的小事。",
+	bio: "记录生活与技术的小站",
 
 	// 链接配置
 	// 已经预装的图标集：fa7-brands，fa7-regular，fa7-solid，material-symbols，simple-icons
