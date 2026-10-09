@@ -65,17 +65,17 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			// 是否启用主页横幅文字
 			enable: true,
 			// 主页横幅主标题
-			title: "Lovely firefly!",
+			title: "星觅海",
 			// 主页横幅主标题字体大小
 			titleSize: "4.5rem",
 			// 主页横幅副标题
 			subtitle: [
-				"In Reddened Chrysalis, I Once Rest",
-				"From Shattered Sky, I Free Fall",
-				"Amidst Silenced Stars, I Deep Sleep",
-				"Upon Lighted Fyrefly, I Soon Gaze",
-				"From Undreamt Night, I Thence Shine",
-				"In Finalized Morrow, I Full Bloom",
+				"折腾 Cloudflare，也记录生活里的小事",
+				"在云端折腾，在生活里写诗",
+				"把折腾过的每一个坑都记下来",
+				"代码之外，还有值得记录的日子",
+				"折腾不停，记录不止",
+				"慢一点也没关系，一直在路上就好",
 			],
 			// 主页横幅副标题字体大小
 			subtitleSize: "1.5rem",
