@@ -39,6 +39,15 @@ export const commentConfig: CommentConfig = {
 		login: "enable",
 		// 是否启用文章访问量统计功能
 		visitorCount: true,
+		// 评论区贴图上传：走自建图床 GH-ImgBed
+		imageUploader: {
+			// GH-ImgBed 的上传接口（Cloudflare Pages Function）
+			url: "https://img.5al.top/upload",
+			// 接口接收的表单字段名
+			fieldName: "file",
+			// 响应形如 { success, data: { link } }，取 data.link
+			responsePath: "data.link",
+		},
 	},
 
 	// artalk评论系统配置

@@ -26,6 +26,18 @@ export type CommentConfig = {
 		emoji: string[];
 		login?: "enable" | "force" | "disable";
 		visitorCount?: boolean; // 是否统计访问量，true 启用访问量，false 关闭
+		/**
+		 * 评论区贴图：自定义图片上传接口
+		 * 不配置则 Waline 回退为默认行为（禁用上传按钮）
+		 */
+		imageUploader?: {
+			/** 上传接口地址，接收 POST multipart/form-data */
+			url: string;
+			/** 表单字段名，默认 "file" */
+			fieldName?: string;
+			/** 从响应 JSON 中取图片链接的路径，如 "data.link"，默认直接取 "link" */
+			responsePath?: string;
+		};
 	};
 	artalk?: {
 		// 后端程序 API 地址

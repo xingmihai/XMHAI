@@ -5,25 +5,58 @@ interface Props {
 	path: string;
 }
 
+const walineCfg = commentConfig.waline;
+const { imageUploader, ...walineOptions } = walineCfg ?? {};
+
 const config = {
-	...commentConfig.waline,
+	...walineOptions,
 	el: "#waline",
 	path: Astro.props.path,
 	dark: "html.dark",
 	wordLimit: ["2", "300"],
-	...(commentConfig.waline?.visitorCount ? { pageview: true } : {}),
+	...(walineCfg?.visitorCount ? { pageview: true } : {}),
 };
+
+// 贴图上传配置：函数无法序列化，这里只传可序列化的参数，在下方 script 内再组装成函数
+const uploader = walineCfg?.imageUploader
+	? {
+			url: walineCfg.imageUploader.url,
+			fieldName: walineCfg.imageUploader.fieldName ?? "file",
+			responsePath: walineCfg.imageUploader.responsePath ?? "link",
+		}
+	: null;
 ---
 <!-- Waline -->
 <div class="relative w-full">
   <div id="waline"></div>
   <link rel="stylesheet" href="https://unpkg.com/@waline/client@v3/dist/waline.css" />
-  <script type="module" is:inline define:vars={{ config }}>
+  <script type="module" is:inline define:vars={{ config, uploader }}>
     import { init } from 'https://unpkg.com/@waline/client@v3/dist/waline.js';
     const requestedPath = new URLSearchParams(window.location.search).get("path");
-    const effectiveConfig = requestedPath
-      ? { ...config, path: requestedPath }
-      : config;
+    const effectiveConfig = { ...config, path: requestedPath || config.path };
+
+    // 评论贴图：上传到自建图床，返回可直接插入评论的图片链接
+    if (uploader) {
+      effectiveConfig.imageUploader = (file) => {
+        const body = new FormData();
+        body.append(uploader.fieldName, file);
+        return fetch(uploader.url, { method: "POST", body })
+          .then((res) => {
+            if (!res.ok) throw new Error("上传接口返回 " + res.status);
+            return res.json();
+          })
+          .then((data) => {
+            const link = uploader.responsePath
+              .split(".")
+              .reduce((obj, key) => (obj == null ? obj : obj[key]), data);
+            if (typeof link !== "string" || !link) {
+              throw new Error("上传接口未返回图片链接");
+            }
+            return link;
+          });
+      };
+    }
+
     try {
       init(effectiveConfig);
     } catch (error) {
