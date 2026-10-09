@@ -5,3 +5,9 @@
 	grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 	gap: 0.75rem;
 }
+
+/* 收款码（矢量 SVG）：不参与 LQIP 淡入，直接常显，避免明暗模式下出现灰色占位块 */
+.sponsor-qr {
+  opacity: 1 !important;
+  background: #ffffff;
+}
