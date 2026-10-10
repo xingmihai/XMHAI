@@ -4,6 +4,11 @@ on:
   push:
     branches: [ master ]
   workflow_dispatch:
+  # 定时重建：让「圈子」等构建时抓取的内容保持新鲜
+  # cron 使用 UTC 时间，这里为每 6 小时的第 17 分钟（对应北京时间的 02:17 / 08:17 / 14:17 / 20:17）
+  # 想调整频率改这一行即可，例如每天一次：'17 2 * * *'
+  schedule:
+    - cron: '17 */6 * * *'
 
 # Pages 部署需要的权限
 permissions:
