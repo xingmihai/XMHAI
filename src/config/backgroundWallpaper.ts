@@ -70,11 +70,8 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			titleSize: "4.5rem",
 			// 主页横幅副标题
 			subtitle: [
-				"折腾 Cloudflare，也记录生活里的小事",
-				"在云端折腾，在生活里写诗",
-				"把折腾过的每一个坑都记下来",
+				"把踩过的每一个坑都记下来",
 				"代码之外，还有值得记录的日子",
-				"折腾不停，记录不止",
 				"慢一点也没关系，一直在路上就好",
 			],
 			// 主页横幅副标题字体大小
