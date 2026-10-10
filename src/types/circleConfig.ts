@@ -42,10 +42,6 @@ export type CirclePageConfig = {
 	totalLimit?: number;
 	// 单个订阅源的抓取超时时间（毫秒）
 	timeout?: number;
-	// 运行时数据源地址，按顺序尝试，取第一个可用的
-	// 由 GitHub Actions 抓取后推送到 circle-data 分支，页面运行时读取
-	// 这样更新文章数据无需重建整站
-	dataUrls?: string[];
 	// 是否显示评论区，默认 false
 	showComment?: boolean;
 };

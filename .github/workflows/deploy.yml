@@ -4,8 +4,6 @@ on:
   push:
     branches: [ master ]
   workflow_dispatch:
-  # 说明：圈子数据由 circle-feed.yml 单独定时更新到 circle-data 分支，
-  # 页面运行时读取，因此整站不需要定时重建
 
 # Pages 部署需要的权限
 permissions:

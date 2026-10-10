@@ -1,9 +1,8 @@
-import type { CirclePageConfig } from "@/types/circleConfig";
+import type { CirclePageConfig, CircleSource } from "@/types/circleConfig";
+import { friendsConfig } from "./friendsConfig";
 
 // 圈子页面配置
-// 聚合展示朋友们博客的最新文章
-// 抓取由 .github/workflows/circle-feed.yml 定时执行，结果写入 circle-data 分支
-// 页面在运行时读取 dataUrls，因此更新数据无需重建整站
+// 聚合展示朋友们博客的最新文章，通过 RSS / Atom 订阅源在构建时抓取
 export const circleConfig: CirclePageConfig = {
 	// 页面标题，留空则使用默认标题「圈子」
 	title: "",
@@ -33,15 +32,38 @@ export const circleConfig: CirclePageConfig = {
 	totalLimit: 40,
 	// 单个订阅源的抓取超时时间（毫秒），网络不好可适当调大
 	timeout: 10000,
-
-	// 运行时数据源：Actions 抓取后写入 circle-data 分支，页面运行时读取
-	// 按顺序尝试，取第一个可用的，可自行增删或换成自己的 CDN
-	dataUrls: [
-		"https://cdn.jsdelivr.net/gh/xingmihai/XMHAI@circle-data/circle.json",
-		"https://fastly.jsdelivr.net/gh/xingmihai/XMHAI@circle-data/circle.json",
-		"https://raw.githubusercontent.com/xingmihai/XMHAI/circle-data/circle.json",
-	],
-
 	// 是否显示评论区
 	showComment: false,
+};
+
+// 汇总所有启用的订阅源：友链来源 + 手动配置的来源
+export const getEnabledCircleSources = (): CircleSource[] => {
+	const sources: CircleSource[] = [];
+
+	if (circleConfig.useFriendsLinks !== false) {
+		for (const friend of friendsConfig) {
+			if (!friend.enabled) continue;
+			sources.push({
+				name: friend.title,
+				avatar: friend.imgurl,
+				site: friend.siteurl,
+				// 留空则由抓取逻辑自动探测常见订阅源路径
+				rss: friend.rss ?? "",
+				enabled: true,
+			});
+		}
+	}
+
+	for (const source of circleConfig.sources ?? []) {
+		if (source.enabled === false) continue;
+		// 同名去重，手动配置的优先
+		const idx = sources.findIndex((s) => s.name === source.name);
+		if (idx >= 0) {
+			sources[idx] = source;
+		} else {
+			sources.push(source);
+		}
+	}
+
+	return sources;
 };
