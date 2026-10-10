@@ -73,3 +73,30 @@
 .circle-failures summary {
   list-style: none;
 }
+
+/* 加载骨架 */
+.circle-skeleton {
+  background-color: var(--line-divider);
+  border-radius: 9999px;
+  animation: circle-pulse 1.4s ease-in-out infinite;
+}
+
+.circle-item-avatar.circle-skeleton {
+  border-radius: 9999px;
+}
+
+@keyframes circle-pulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.75;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .circle-skeleton {
+    animation: none;
+  }
+}
