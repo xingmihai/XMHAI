@@ -34,6 +34,8 @@ export type CirclePageConfig = {
 	// 是否自动从友链配置中读取订阅源
 	// 开启后，会把 friendsConfig 里配置了 rss 字段的友链也作为订阅源
 	useFriendsLinks?: boolean;
+	// 是否对未填 rss 的友链自动探测常见订阅源路径，默认 false
+	autoDiscover?: boolean;
 	// 手动维护的订阅源列表
 	sources?: CircleSource[];
 	// 每个订阅源最多取多少篇文章

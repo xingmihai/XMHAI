@@ -10,9 +10,14 @@ export const circleConfig: CirclePageConfig = {
 	description: "",
 
 	// 是否自动从友链配置中读取订阅源
-	// 开启后，friendsConfig 里 enabled 为 true 的友链都会被自动纳入
-	// 友链若填了 rss 字段则优先用该地址，未填会自动探测常见订阅源路径
+	// 开启后，friendsConfig 里 enabled 为 true 且填了 rss 字段的友链会被自动纳入
 	useFriendsLinks: true,
+
+	// 是否对「未填 rss 的友链」自动探测常见订阅源路径（/rss.xml、/feed 等）
+	// 关闭时只抓取明确填了 rss 地址的站点：
+	//   构建更快、失败列表更干净；缺点是漏掉那些有 RSS 但你没填地址的站点
+	// 建议保持 false，需要订阅哪个站就在友链里补上它的 rss 地址
+	autoDiscover: false,
 
 	// 手动维护的订阅源（会与友链来源合并，同名以这里为准）
 	// 适合收录没有加进友链、但想订阅的博客
@@ -43,6 +48,8 @@ export const getEnabledCircleSources = (): CircleSource[] => {
 	if (circleConfig.useFriendsLinks !== false) {
 		for (const friend of friendsConfig) {
 			if (!friend.enabled) continue;
+			// 关闭自动探测时，只收录明确填了 rss 地址的站点
+			if (circleConfig.autoDiscover !== true && !friend.rss) continue;
 			sources.push({
 				name: friend.title,
 				avatar: friend.imgurl,
