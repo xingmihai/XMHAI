@@ -4,10 +4,8 @@ on:
   push:
     branches: [ master ]
   workflow_dispatch:
-  # 定时重建：让圈子页面能自动刷新友链 RSS 的最新文章
-  # cron 使用 UTC 时间，下方为北京时间 09:00 与 21:00 各一次，可自行调整
-  schedule:
-    - cron: '0 1,13 * * *'
+  # 说明：圈子数据由 circle-feed.yml 单独定时更新到 circle-data 分支，
+  # 页面运行时读取，因此整站不需要定时重建
 
 # Pages 部署需要的权限
 permissions:
@@ -43,9 +41,6 @@ jobs:
       
       - name: Build site
         run: pnpm run build
-        env:
-          # 让页面上「更新于」的时间显示为北京时间，而非 runner 默认的 UTC
-          TZ: Asia/Shanghai
 
       - name: Create .nojekyll file
         run: touch dist/.nojekyll
