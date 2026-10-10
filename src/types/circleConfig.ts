@@ -40,8 +40,13 @@ export type CirclePageConfig = {
 	limitPerSource?: number;
 	// 页面最多展示多少篇文章
 	totalLimit?: number;
-	// 单个订阅源的抓取超时时间（毫秒）
+	// 单个请求的超时时间（毫秒）
 	timeout?: number;
+	// CORS 代理前缀列表，按尝试顺序排列
+	// 空字符串表示直连；形如 "https://your-proxy/?url=" 的请求地址会被拼上编码后的订阅源地址
+	proxies?: string[];
+	// 抓取结果的本地缓存时长（分钟），0 表示不缓存
+	cacheMinutes?: number;
 	// 是否显示评论区，默认 false
 	showComment?: boolean;
 };
