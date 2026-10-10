@@ -71,7 +71,7 @@ export const backgroundWallpaper: BackgroundWallpaperConfig = {
 			// 主页横幅副标题
 			subtitle: [
 				"把踩过的每一个坑都记下来",
-				"代码之外，还有值得记录的日子"
+				"代码之外，还有值得记录的日子",
 				"慢一点也没关系，一直在路上就好",
 			],
 			// 主页横幅副标题字体大小
