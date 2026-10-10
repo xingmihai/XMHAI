@@ -1,0 +1,38 @@
+/* 萌国ICP备案（萌备）图标字体
+   来自官方 moe-icon 图标包（IcoMoon 生成）
+   注意：这里刻意不使用 IcoMoon 默认的 [class^="icon-"] 通配选择器——
+   站内 astro-icon 生成的 SVG 也大量使用 icon- 前缀的类名（icon-lrc-off、icon-vol-mute 等），
+   通配选择器会给它们强行套上本字体，导致图标全部失效。
+   因此只保留 .icon-MOE 这一个精确类名。 */
+
+@font-face {
+	font-family: "moe-icp";
+	src: url("/assets/fonts/moe-icp/icomoon.eot?n169zo");
+	src:
+		url("/assets/fonts/moe-icp/icomoon.eot?n169zo#iefix")
+			format("embedded-opentype"),
+		url("/assets/fonts/moe-icp/icomoon.ttf?n169zo") format("truetype"),
+		url("/assets/fonts/moe-icp/icomoon.woff?n169zo") format("woff"),
+		url("/assets/fonts/moe-icp/icomoon.svg?n169zo#icomoon") format("svg");
+	font-weight: normal;
+	font-style: normal;
+	font-display: block;
+}
+
+.icon-MOE {
+	font-family: "moe-icp" !important;
+	speak: never;
+	font-style: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	line-height: 1;
+
+	/* 更好的字体渲染 */
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.icon-MOE::before {
+	content: "\e900";
+}
