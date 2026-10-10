@@ -42,18 +42,6 @@ function formatDate(item: CircleItem): string {
 	const pad = (n: number) => String(n).padStart(2, "0");
 	return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
-
-// 本次构建的抓取时间（北京时间），展示在页面底部
-const fetchedAt = new Date();
-const fetchedAtText = new Intl.DateTimeFormat("zh-CN", {
-	timeZone: "Asia/Shanghai",
-	year: "numeric",
-	month: "2-digit",
-	day: "2-digit",
-	hour: "2-digit",
-	minute: "2-digit",
-	hour12: false,
-}).format(fetchedAt);
 ---
 
 <MainGridLayout title={title} description={description}>
@@ -156,15 +144,6 @@ const fetchedAtText = new Intl.DateTimeFormat("zh-CN", {
             <div class="text-xs mt-1.5 opacity-70">
               在友链配置里给站点填上 rss 地址，或在 circleConfig 里手动添加订阅源
             </div>
-          </div>
-        )
-      }
-
-      <!-- 抓取时间 -->
-      {
-        items.length > 0 && (
-          <div class="mt-5 text-xs text-neutral-400 dark:text-neutral-500">
-            抓取于 {fetchedAtText}（站点定时重建，通常 6 小时内自动更新）
           </div>
         )
       }
