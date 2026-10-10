@@ -42,6 +42,15 @@ function formatDate(item: CircleItem): string {
 	const pad = (n: number) => String(n).padStart(2, "0");
 	return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 }
+
+// 本次构建（抓取）的时间，用于告知访客数据新鲜度
+// 定时重建时这个值会随之更新
+const fetchedAt = new Date();
+const fetchedAtText = `${fetchedAt.getFullYear()}-${String(
+	fetchedAt.getMonth() + 1,
+).padStart(2, "0")}-${String(fetchedAt.getDate()).padStart(2, "0")} ${String(
+	fetchedAt.getHours(),
+).padStart(2, "0")}:${String(fetchedAt.getMinutes()).padStart(2, "0")}`;
 ---
 
 <MainGridLayout title={title} description={description}>
@@ -67,7 +76,7 @@ function formatDate(item: CircleItem): string {
         sources.length > 0 && (
           <div class="flex flex-wrap items-center gap-2 mb-5">
             <span class="text-sm text-neutral-500 dark:text-neutral-400">
-              已订阅 {sources.length} 个站点
+              已订阅 {sources.length} 个站点 · 更新于 {fetchedAtText}
             </span>
             {sources.map((source) => (
               <a
