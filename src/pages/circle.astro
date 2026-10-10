@@ -2,7 +2,8 @@
 import { Icon } from "astro-icon/components";
 import { circleConfig, getEnabledCircleSources, siteConfig } from "@/config";
 import MainGridLayout from "@/layouts/MainGridLayout.astro";
-import type { CircleData } from "@/types/circleConfig";
+import type { CircleItem } from "@/types/circleConfig";
+import { fetchAllSources } from "@/utils/rss-parser";
 import "@/styles/pages/common.css";
 import "@/styles/pages/circle.css";
 
@@ -15,15 +16,32 @@ const title = circleConfig.title || "圈子";
 const description =
 	circleConfig.description || "朋友们最近写下的东西，由订阅源自动汇总。";
 
-// 站点清单在构建期就能确定，先渲染出来；文章列表由浏览器读取 circle.json 后填充
+// 构建时抓取所有订阅源
 const sources = getEnabledCircleSources();
 
-// 传给客户端脚本的配置
-const clientConfig = {
-	dataUrl: circleConfig.dataUrl ?? "",
-	fallbackUrls: circleConfig.fallbackUrls ?? [],
-	cacheMinutes: 10,
-};
+// 抓取失败不应导致整站构建中断，这里做一层兜底
+let items: CircleItem[] = [];
+let failures: { name: string; error: string }[] = [];
+try {
+	const result = await fetchAllSources(sources, {
+		timeout: circleConfig.timeout,
+		limitPerSource: circleConfig.limitPerSource,
+		totalLimit: circleConfig.totalLimit,
+	});
+	items = result.items;
+	failures = result.failures;
+} catch (error) {
+	console.error("[Circle] 抓取订阅源失败:", error);
+	failures = [{ name: "全部订阅源", error: "抓取过程出现异常" }];
+}
+
+// 把日期格式化成 YYYY-MM-DD，解析失败则返回空
+function formatDate(item: CircleItem): string {
+	if (!item.timestamp) return "";
+	const d = new Date(item.timestamp);
+	const pad = (n: number) => String(n).padStart(2, "0");
+	return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
 ---
 
 <MainGridLayout title={title} description={description}>
@@ -74,296 +92,80 @@ const clientConfig = {
         )
       }
 
-      <!-- 文章列表：由客户端脚本填充 -->
-      <div id="circle-content" aria-live="polite">
-        <div class="circle-list" aria-busy="true">
-          {
-            Array.from({ length: 5 }).map(() => (
-              <div class="circle-item flex items-start gap-3 py-3.5">
-                <div class="circle-item-avatar circle-skeleton" />
-                <div class="grow pt-0.5 space-y-2">
-                  <div class="circle-skeleton h-4 w-3/4 rounded" />
-                  <div class="circle-skeleton h-3 w-24 rounded" />
+      <!-- 文章列表 -->
+      {
+        items.length > 0 ? (
+          <div class="circle-list">
+            {items.map((item) => (
+              <a
+                href={item.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="circle-item group flex items-start gap-3 py-3.5 px-3 -mx-3 rounded-xl transition-all duration-200"
+              >
+                {item.sourceAvatar ? (
+                  <img
+                    src={item.sourceAvatar}
+                    alt={item.sourceName}
+                    class="circle-item-avatar"
+                  />
+                ) : (
+                  <div class="circle-item-avatar circle-item-avatar--placeholder">
+                    <Icon name="material-symbols:rss-feed-rounded" />
+                  </div>
+                )}
+
+                <div class="grow min-w-0">
+                  <div class="circle-item-title group-hover:text-(--primary) transition-colors duration-200 line-clamp-2">
+                    {item.title}
+                  </div>
+                  <div class="flex items-center gap-2 mt-1 text-xs text-neutral-500 dark:text-neutral-400">
+                    <span class="truncate max-w-[14rem]">{item.sourceName}</span>
+                    {formatDate(item) && (
+                      <>
+                        <span aria-hidden="true">·</span>
+                        <time class="shrink-0">{formatDate(item)}</time>
+                      </>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))
-          }
-        </div>
-      </div>
+
+                <Icon
+                  name="material-symbols:arrow-outward-rounded"
+                  class="shrink-0 text-base text-(--primary) opacity-0 group-hover:opacity-100 transition-opacity duration-200 mt-0.5"
+                />
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div class="flex flex-col items-center justify-center py-14 text-neutral-400 dark:text-neutral-500">
+            <Icon name="material-symbols:rss-feed-rounded" class="text-4xl mb-3" />
+            <div class="text-sm">还没有抓到任何文章</div>
+            <div class="text-xs mt-1.5 opacity-70">
+              在友链配置里给站点填上 rss 地址，或在 circleConfig 里手动添加订阅源
+            </div>
+          </div>
+        )
+      }
 
       <!-- 抓取失败的站点提示 -->
-      <div id="circle-failures"></div>
-
-      <!-- 数据更新时间 -->
-      <div
-        id="circle-updated"
-        class="mt-5 text-xs text-neutral-400 dark:text-neutral-500 hidden"
-      >
-      </div>
+      {
+        failures.length > 0 && (
+          <details class="circle-failures mt-6 text-xs">
+            <summary class="cursor-pointer text-neutral-500 dark:text-neutral-400 hover:text-(--primary) transition-colors duration-200">
+              {failures.length} 个站点未能抓到内容
+            </summary>
+            <ul class="mt-2 space-y-1 pl-1">
+              {failures.map((f) => (
+                <li class="text-neutral-400 dark:text-neutral-500">
+                  <span class="font-medium">{f.name}</span>
+                  <span class="opacity-70"> — {f.error}</span>
+                </li>
+              ))}
+            </ul>
+          </details>
+        )
+      }
     </div>
   </div>
 </MainGridLayout>
-
-{/* 配置数据：以 JSON 形式注入，避免与打包脚本的 import 冲突 */}
-<script
-  id="circle-config"
-  type="application/json"
-  set:html={JSON.stringify(clientConfig)}
-/>
-
-<script>
-  interface Item {
-    title: string;
-    link: string;
-    published: string;
-    timestamp: number;
-    sourceName: string;
-    sourceAvatar?: string;
-    sourceSite: string;
-  }
-  interface Failure {
-    name: string;
-    error: string;
-  }
-  interface Data {
-    updatedAt: number;
-    updatedAtText?: string;
-    items: Item[];
-    failures: Failure[];
-  }
-
-  const CACHE_KEY = "firefly-circle-data";
-
-  const configEl = document.getElementById("circle-config");
-  const contentEl = document.getElementById("circle-content");
-  const failuresEl = document.getElementById("circle-failures");
-  const updatedEl = document.getElementById("circle-updated");
-
-  if (configEl && contentEl) {
-    const config = JSON.parse(configEl.textContent || "{}");
-    const urls: string[] = [
-      ...(config.dataUrl ? [config.dataUrl] : []),
-      ...(config.fallbackUrls || []),
-    ];
-    const cacheMinutes: number = config.cacheMinutes ?? 10;
-
-    // 把时间戳格式化成 YYYY-MM-DD
-    function formatDate(ts: number): string {
-      if (!ts) return "";
-      const d = new Date(ts);
-      const pad = (n: number) => String(n).padStart(2, "0");
-      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    }
-
-    // 相对时间描述，例如「3 小时前」
-    function timeAgo(ts: number): string {
-      const diff = Date.now() - ts;
-      if (diff < 0) return "刚刚";
-      const min = Math.floor(diff / 60000);
-      if (min < 1) return "刚刚";
-      if (min < 60) return `${min} 分钟前`;
-      const hour = Math.floor(min / 60);
-      if (hour < 24) return `${hour} 小时前`;
-      return `${Math.floor(hour / 24)} 天前`;
-    }
-
-    // 依次尝试各个数据地址，取第一个可用的
-    async function fetchData(): Promise<Data | null> {
-      for (const url of urls) {
-        try {
-          const res = await fetch(url, { cache: "no-store" });
-          if (!res.ok) continue;
-          const data = (await res.json()) as Data;
-          if (data && Array.isArray(data.items)) return data;
-        } catch {
-          // 换下一个地址
-        }
-      }
-      return null;
-    }
-
-    function renderItems(items: Item[]) {
-      if (!contentEl) return;
-      contentEl.innerHTML = "";
-
-      if (items.length === 0) {
-        const empty = document.createElement("div");
-        empty.className =
-          "flex flex-col items-center justify-center py-14 text-neutral-400 dark:text-neutral-500";
-        const t = document.createElement("div");
-        t.className = "text-sm";
-        t.textContent = "暂时没有内容";
-        const hint = document.createElement("div");
-        hint.className = "text-xs mt-1.5 opacity-70";
-        hint.textContent = "数据由定时任务自动生成，首次运行后这里就会有内容";
-        empty.append(t, hint);
-        contentEl.append(empty);
-        return;
-      }
-
-      const list = document.createElement("div");
-      list.className = "circle-list";
-
-      for (const item of items) {
-        const a = document.createElement("a");
-        a.href = item.link;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-        a.className =
-          "circle-item group flex items-start gap-3 py-3.5 px-3 -mx-3 rounded-xl transition-all duration-200";
-
-        if (item.sourceAvatar) {
-          const img = document.createElement("img");
-          img.src = item.sourceAvatar;
-          img.alt = item.sourceName;
-          img.className = "circle-item-avatar";
-          a.append(img);
-        } else {
-          const ph = document.createElement("div");
-          ph.className =
-            "circle-item-avatar circle-item-avatar--placeholder flex items-center justify-center text-sm";
-          ph.textContent = "✦";
-          a.append(ph);
-        }
-
-        const body = document.createElement("div");
-        body.className = "grow min-w-0";
-
-        const t = document.createElement("div");
-        t.className =
-          "circle-item-title group-hover:text-(--primary) transition-colors duration-200 line-clamp-2";
-        t.textContent = item.title;
-
-        const meta = document.createElement("div");
-        meta.className =
-          "flex items-center gap-2 mt-1 text-xs text-neutral-500 dark:text-neutral-400";
-        const name = document.createElement("span");
-        name.className = "truncate max-w-[14rem]";
-        name.textContent = item.sourceName;
-        meta.append(name);
-
-        if (item.timestamp) {
-          const dot = document.createElement("span");
-          dot.setAttribute("aria-hidden", "true");
-          dot.textContent = "·";
-          const time = document.createElement("time");
-          time.className = "shrink-0";
-          time.textContent = formatDate(item.timestamp);
-          meta.append(dot, time);
-        }
-
-        body.append(t, meta);
-        a.append(body);
-
-        const arrow = document.createElement("span");
-        arrow.className =
-          "shrink-0 text-base text-(--primary) opacity-0 group-hover:opacity-100 transition-opacity duration-200 mt-0.5";
-        arrow.textContent = "↗";
-        a.append(arrow);
-
-        list.append(a);
-      }
-
-      contentEl.append(list);
-    }
-
-    function renderFailures(failures: Failure[]) {
-      if (!failuresEl) return;
-      failuresEl.innerHTML = "";
-      if (!failures || failures.length === 0) return;
-
-      const details = document.createElement("details");
-      details.className = "circle-failures mt-6 text-xs";
-
-      const summary = document.createElement("summary");
-      summary.className =
-        "cursor-pointer text-neutral-500 dark:text-neutral-400 hover:text-(--primary) transition-colors duration-200";
-      summary.textContent = `${failures.length} 个站点暂时没抓到`;
-      details.append(summary);
-
-      const ul = document.createElement("ul");
-      ul.className = "mt-2 space-y-1 pl-1";
-      for (const f of failures) {
-        const li = document.createElement("li");
-        li.className = "text-neutral-400 dark:text-neutral-500";
-        li.textContent = f.error ? `${f.name} — ${f.error}` : f.name;
-        ul.append(li);
-      }
-      details.append(ul);
-      failuresEl.append(details);
-    }
-
-    function showUpdated(data: Data) {
-      if (!updatedEl) return;
-      const ts = data.updatedAt || 0;
-      const base = data.updatedAtText || (ts ? formatDate(ts) : "");
-      const ago = ts ? timeAgo(ts) : "";
-      updatedEl.textContent = base
-        ? `数据更新于 ${base}${ago ? `（${ago}）` : ""}`
-        : "";
-      if (updatedEl.textContent) updatedEl.classList.remove("hidden");
-    }
-
-    function showError() {
-      if (!contentEl) return;
-      contentEl.innerHTML = "";
-      const box = document.createElement("div");
-      box.className =
-        "flex flex-col items-center justify-center py-14 text-neutral-400 dark:text-neutral-500";
-      const t = document.createElement("div");
-      t.className = "text-sm";
-      t.textContent = "没能读到数据";
-      const hint = document.createElement("div");
-      hint.className = "text-xs mt-1.5 opacity-70";
-      hint.textContent = "可能是网络或 CDN 暂时不可用，稍后刷新再试试";
-      box.append(t, hint);
-      contentEl.append(box);
-    }
-
-    // 本地缓存：避免每次进页面都重新请求 CDN
-    function readCache(): Data | null {
-      if (cacheMinutes <= 0) return null;
-      try {
-        const raw = sessionStorage.getItem(CACHE_KEY);
-        if (!raw) return null;
-        const data = JSON.parse(raw) as Data;
-        if (!data?.updatedAt) return null;
-        if (Date.now() - data.updatedAt > cacheMinutes * 60 * 1000) return null;
-        return data;
-      } catch {
-        return null;
-      }
-    }
-
-    function writeCache(data: Data) {
-      try {
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify(data));
-      } catch {
-        // 存储不可用时忽略
-      }
-    }
-
-    async function load() {
-      const cached = readCache();
-      if (cached) {
-        renderItems(cached.items);
-        renderFailures(cached.failures);
-        showUpdated(cached);
-        return;
-      }
-
-      const data = await fetchData();
-      if (!data) {
-        showError();
-        return;
-      }
-
-      renderItems(data.items);
-      renderFailures(data.failures);
-      showUpdated(data);
-      writeCache(data);
-    }
-
-    load();
-  }
-</script>

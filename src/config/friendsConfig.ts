@@ -30,8 +30,6 @@ export const friendsConfig: FriendLink[] = [
 		tags: ["Blog"],
 		weight: 10, // 权重，数字越大排序越靠前
 		enabled: true, // 是否启用
-		// RSS 订阅源地址，供圈子页面抓取该站最新文章
-		rss: "https://blog.xiaow.qzz.io/rss.xml",
 	},
 	{
 		title: "韩小韩博客",
@@ -41,8 +39,6 @@ export const friendsConfig: FriendLink[] = [
 		tags: ["Blog"],
 		weight: 9,
 		enabled: true,
-		// RSS 订阅源地址，供圈子页面抓取该站最新文章
-		rss: "https://www.vvhan.com/rss.xml",
 	},
 	{
 		title: "萌国萌站广场",
