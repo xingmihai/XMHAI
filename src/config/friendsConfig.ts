@@ -27,7 +27,6 @@ export const friendsConfig: FriendLink[] = [
 		imgurl: "https://q1.qlogo.cn/g?b=qq&nk=548541786&s=100",
 		desc: "一起分享，共同进步",
 		siteurl: "https://blog.xiaow.qzz.io",
-		rss: "https://blog.xiaow.qzz.io/rss.xml",
 		tags: ["Blog"],
 		weight: 10, // 权重，数字越大排序越靠前
 		enabled: true, // 是否启用
@@ -37,7 +36,6 @@ export const friendsConfig: FriendLink[] = [
 		imgurl: "https://q1.qlogo.cn/g?b=qq&nk=1655466387&s=100",
 		desc: "运气是计划之外的东西",
 		siteurl: "https://www.vvhan.com",
-		rss: "https://www.vvhan.com/rss.xml",
 		tags: ["Blog"],
 		weight: 9,
 		enabled: true,
@@ -65,7 +63,6 @@ export const friendsConfig: FriendLink[] = [
 		imgurl: "https://www.blogsclub.org/usr/themes/default/favicon.png",
 		desc: "博客俱乐部",
 		siteurl: "https://www.blogsclub.org/",
-		rss: "https://www.blogsclub.org/feed",
 		tags: ["导航"],
 		weight: 6,
 		enabled: true,
@@ -75,7 +72,6 @@ export const friendsConfig: FriendLink[] = [
 		imgurl: "https://www.boyouquan.com/assets/favicon.ico",
 		desc: "博客人的朋友圈",
 		siteurl: "https://www.boyouquan.com/",
-		rss: "https://www.boyouquan.com/feed.xml",
 		tags: ["导航"],
 		weight: 5,
 		enabled: true,
