@@ -64,6 +64,15 @@ const description =
             {description && <p>{description}</p>}
           </div>
         </div>
+        {
+          /* 仅在开启随机排序时显示，避免说明与实际行为不符 */
+          shouldShuffle && (
+            <p class="friends-note mt-2 flex items-center gap-1.5 text-xs text-neutral-500 dark:text-neutral-400">
+              <Icon name="material-symbols:shuffle" class="text-sm shrink-0" />
+              <span>排名不分前后，每次刷新随机排序</span>
+            </p>
+          )
+        }
       </div>
 
       <!-- 搜索框 -->
