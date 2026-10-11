@@ -28,6 +28,9 @@
 	text-transform: none;
 	line-height: 1;
 
+	/* 图标着色：只作用于图标本身，不影响旁边「萌ICP备 xxx 号」文字 */
+	color: #ff1485;
+
 	/* 更好的字体渲染 */
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
