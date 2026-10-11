@@ -5,3 +5,10 @@
 	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
 	gap: 0.75rem;
 }
+
+/* 打乱前先隐藏，避免访客看到卡片顺序跳变。
+   用 opacity 而非 display，保持占位，不会造成布局跳动。
+   脚本打乱完成后会移除该类；若 JS 不可用，由 noscript 兜底恢复显示。 */
+.friends-grid--pending {
+	opacity: 0;
+}

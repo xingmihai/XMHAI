@@ -38,6 +38,10 @@ const isCommentEnabled =
 const items = getEnabledFriends();
 const allTags = [...new Set(items.flatMap((item) => item.tags || []))].sort();
 
+// 是否每次刷新都重新打乱友链顺序（由 friendsPageConfig.randomizeSort 控制）
+// 构建时的随机只在下次构建才变，这里改为在浏览器里每次加载都打乱一次
+const shouldShuffle = friendsPageConfig.randomizeSort === true;
+
 // 页面标题和描述
 const title = friendsPageConfig.title || i18n(I18nKey.friends);
 const description =
@@ -99,7 +103,14 @@ const description =
         )
       }
 
-      <div class="friends-grid my-4">
+      <div
+        id="friends-grid"
+        class:list={[
+          "friends-grid",
+          "my-4",
+          { "friends-grid--pending": shouldShuffle },
+        ]}
+      >
         {
           items.length === 0 && (
             <div class="col-span-full flex flex-col items-center justify-center py-12 text-neutral-400 dark:text-neutral-500">
@@ -270,6 +281,72 @@ const description =
       }
       customElements.define("friend-filter", FriendFilter);
     }
+  </script>
+
+  <!-- JS 不可用时兜底：直接显示友链，避免一直隐藏 -->
+  <noscript>
+    <style>
+      .friends-grid--pending {
+        opacity: 1;
+      }
+    </style>
+  </noscript>
+
+  <script is:inline define:vars={{ shouldShuffle }}>
+    // 每次页面加载都重新打乱友链顺序，让每个站点曝光机会均等
+    // 只在首次加载时打乱一次；搜索与标签筛选只是显示/隐藏卡片，
+    // 不会重新排序，因此来回切换时顺序保持稳定
+    (function () {
+      if (!shouldShuffle) return;
+
+      function shuffleCards() {
+        var grid = document.getElementById("friends-grid");
+        if (!grid) return;
+
+        var cards = Array.prototype.slice.call(
+          grid.querySelectorAll(".friend-card"),
+        );
+        if (cards.length < 2) {
+          grid.classList.remove("friends-grid--pending");
+          return;
+        }
+
+        // Fisher-Yates 洗牌
+        for (var i = cards.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = cards[i];
+          cards[i] = cards[j];
+          cards[j] = tmp;
+        }
+
+        var frag = document.createDocumentFragment();
+        cards.forEach(function (card) {
+          frag.appendChild(card);
+        });
+        grid.appendChild(frag);
+
+        grid.classList.remove("friends-grid--pending");
+      }
+
+      document.addEventListener("DOMContentLoaded", shuffleCards);
+
+      // Swup 无刷新切换后重新打乱
+      if (window.swup && window.swup.hooks) {
+        window.swup.hooks.on("content:replace", function () {
+          setTimeout(shuffleCards, 100);
+        });
+      } else {
+        document.addEventListener("swup:enable", function () {
+          if (window.swup && window.swup.hooks) {
+            window.swup.hooks.on("content:replace", function () {
+              setTimeout(shuffleCards, 100);
+            });
+          }
+        });
+      }
+
+      document.addEventListener("firefly:page:loaded", shuffleCards);
+    })();
   </script>
 
 </MainGridLayout>
