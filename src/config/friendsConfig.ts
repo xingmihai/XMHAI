@@ -76,6 +76,15 @@ export const friendsConfig: FriendLink[] = [
 		weight: 5,
 		enabled: true,
 	},
+	{
+		title: "Indi · 中文独立博客",
+		imgurl: "https://indi.blog/favicon.ico",
+		desc: "收录中文独立博客，每小时检查一次 RSS",
+		siteurl: "https://indi.blog/",
+		tags: ["导航"],
+		weight: 4,
+		enabled: true,
+	},
 ];
 
 // 获取启用的友链并进行排序
