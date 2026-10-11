@@ -87,7 +87,7 @@ export const friendsConfig: FriendLink[] = [
 	},
 	{
 		title: "博客汇",
-		imgurl: "https://bkh.jyblog.com/favicon.ico",
+		imgurl: "https://bkh.jyblog.com/assets/brand/favicon.ico",
 		desc: "万博汇聚，一源知新",
 		siteurl: "https://bkh.jyblog.com/",
 		tags: ["导航"],
