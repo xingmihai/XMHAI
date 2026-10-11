@@ -85,6 +85,15 @@ export const friendsConfig: FriendLink[] = [
 		weight: 4,
 		enabled: true,
 	},
+	{
+		title: "博客汇",
+		imgurl: "https://bkh.jyblog.com/favicon.ico",
+		desc: "万博汇聚，一源知新",
+		siteurl: "https://bkh.jyblog.com/",
+		tags: ["导航"],
+		weight: 3,
+		enabled: true,
+	},
 ];
 
 // 获取启用的友链并进行排序
