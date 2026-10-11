@@ -54,13 +54,12 @@ export const siteConfig: SiteConfig = {
 
 	// 站点描述
 	description:
-		"星觅海的个人博客，记录折腾 Cloudflare、自建服务与日常生活的点滴。",
+		"星觅海的个人博客，记录技术与生活的小站。",
 
 	// 站点关键词
 	keywords: [
 		"星觅海",
-		"xmhai",
-		"Cloudflare",
+		"xingmihai",
 		"博客",
 		"技术博客",
 		"个人博客",
