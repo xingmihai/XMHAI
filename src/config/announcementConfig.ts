@@ -5,7 +5,7 @@ export const announcementConfig: AnnouncementConfig = {
 	title: "",
 
 	// 公告内容
-	content: "欢迎来到星觅海的小站，这里记录折腾与日常。",
+	content: "欢迎来到星觅海的小站，这里记录技术与日常。",
 
 	// 是否允许用户关闭公告
 	closable: true,
