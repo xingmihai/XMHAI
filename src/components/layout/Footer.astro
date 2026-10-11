@@ -37,9 +37,6 @@ try {
 
 	<div class="transition flex flex-col items-center justify-center px-6">
 		<div class="transition text-50 text-sm text-center wrap">
-			<div class="mb-2">
-				{customFooterHtml && <div set:html={customFooterHtml} />}
-			</div>
 			<div class="mx-0.5 my-2.5 flex gap-x-2 gap-y-2.5 justify-center flex-wrap">
 				&copy; <span id="copyright-year">{currentYear}</span>
 				{profileConfig.name}. All Rights Reserved.
@@ -85,6 +82,8 @@ try {
 					href="https://github.com/CuteLeaf/Firefly">Firefly</a
 				>
 			</div>
+			<!-- 自定义页脚内容（src/config/FooterConfig.html），显示在最底部 -->
+			{customFooterHtml && <div class="mt-2" set:html={customFooterHtml} />}
 		</div>
 	</div>
 </footer>
