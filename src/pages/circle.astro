@@ -147,6 +147,25 @@ const dataUrls = circleConfig.dataUrls ?? [];
 				html += "</div>";
 			}
 
+			// 抓取失败的站点（放在列表上方，便于一眼看到有哪些站没抓到）
+			if (failures.length > 0) {
+				html += '<details class="circle-failures mb-5 text-xs">';
+				html +=
+					'<summary class="cursor-pointer text-neutral-500 dark:text-neutral-400 hover:text-(--primary) transition-colors duration-200">' +
+					failures.length +
+					" 个站点未能抓到内容</summary>";
+				html += '<ul class="mt-2 space-y-1 pl-1">';
+				failures.forEach(function (f) {
+					html +=
+						'<li class="text-neutral-400 dark:text-neutral-500"><span class="font-medium">' +
+						escapeHtml(f.name) +
+						'</span><span class="opacity-70"> — ' +
+						escapeHtml(f.error) +
+						"</span></li>";
+				});
+				html += "</ul></details>";
+			}
+
 			// 文章列表
 			if (items.length > 0) {
 				html += '<div class="circle-list">';
@@ -199,24 +218,26 @@ const dataUrls = circleConfig.dataUrls ?? [];
 					"</div>";
 			}
 
-			// 抓取失败的站点
-			if (failures.length > 0) {
-				html += '<details class="circle-failures mt-6 text-xs">';
-				html +=
-					'<summary class="cursor-pointer text-neutral-500 dark:text-neutral-400 hover:text-(--primary) transition-colors duration-200">' +
-					failures.length +
-					" 个站点未能抓到内容</summary>";
-				html += '<ul class="mt-2 space-y-1 pl-1">';
-				failures.forEach(function (f) {
-					html +=
-						'<li class="text-neutral-400 dark:text-neutral-500"><span class="font-medium">' +
-						escapeHtml(f.name) +
-						'</span><span class="opacity-70"> — ' +
-						escapeHtml(f.error) +
-						"</span></li>";
-				});
-				html += "</ul></details>";
-			}
+			// 底部提示：没看到自己的文章该怎么办
+			html += '<details class="circle-failures mt-6 text-xs">';
+			html +=
+				'<summary class="cursor-pointer text-neutral-500 dark:text-neutral-400 hover:text-(--primary) transition-colors duration-200">' +
+				"没看到自己的文章？</summary>";
+			html +=
+				'<div class="mt-2 pl-1 space-y-1.5 text-neutral-400 dark:text-neutral-500 leading-relaxed">';
+			html += "<div>这里只收录友链中的站点，先看看你的博客是否在列：</div>";
+			html +=
+				'<div><a href="/friends/" class="text-(--primary) hover:underline">前往友链页面查看 →</a></div>';
+			html += '<div class="mt-2">如果已在友链里，可能的原因：</div>';
+			html += "<ul class=\"list-disc pl-4 space-y-1\">";
+			html +=
+				"<li>站点没有开启 RSS / Atom 订阅，或订阅源地址比较特殊，自动探测找不到</li>";
+			html += "<li>每个站点只显示最新的几篇文章，更早的不会出现在列表里</li>";
+			html += "<li>数据每 6 小时自动刷新一次，刚发布的文章最多需要等这么久才会出现</li>";
+			html += "</ul>";
+			html +=
+				'<div class="mt-2">想加入收录或反馈问题，可通过友链页面上的联系方式与站长沟通。</div>';
+			html += "</div></details>";
 
 			root.innerHTML = html;
 		}
