@@ -49,10 +49,21 @@ graph LR
 
 ## 特性
 
+**存储**
+
 - **数据自主** — 图片存在自己的 GitHub 仓库，不依赖任何第三方图床服务
 - **不会过期** — 没有「X 个月未访问自动删除」的策略
 - **可以删除** — 上传响应返回 `sha`，可精确删除单个文件
 - **仓库可私有** — 访问代理携带令牌回源，代码无需开源
+
+**安全**
+
+- **可选人机验证** — 接入 Cloudflare Turnstile，一次验证放行整批上传
+- **串行上传** — 一次只传一张，避免并发触发 Cloudflare 免费额度的资源上限
+- **错误可见** — 上传失败会显示服务端给出的具体原因，而不是笼统的「网络错误」
+
+**分发**
+
 - **边缘缓存** — Cloudflare Cache API 确定性缓存，首次访问即生效
 - **链接与后端解耦** — 访问统一走 `/v2/` 代理，日后换存储或 CDN，老链接不用改
 - **免域名** — 可用 `*.pages.dev`，也支持绑定自己的域名
@@ -102,12 +113,46 @@ git push -u origin images
 | `GITHUB_OWNER` | 存图仓库的所有者用户名 | ✅ |
 | `GITHUB_REPO` | 存图仓库名 | ✅ |
 | `GITHUB_PATH` | 仓库内子目录，留空则存根目录 | 可选 |
+| `TURNSTILE_SECRET` | Turnstile 的 **Secret Key**（不是 Site Key） | 可选 |
+| `TURNSTILE_HOSTNAMES` | 实际访问用的完整主机名，逗号分隔 | 启用验证时必填 |
+
+> Turnstile 的 Site Key 和 Secret Key **长得几乎一样**（都以 `0x4AAAAAAA` 开头），
+> 极易填错。Site Key 已写在 `index.html` 里（公开无妨），Secret Key 只能进环境变量。
+>
+> `TURNSTILE_HOSTNAMES` 必须是**完整主机名**（如 `img.5al.top`，不能只写 `5al.top`），
+> 且与 Turnstile 控制台里该 widget 的 domains **完全一致**。
 
 Pages 构建设置：Framework preset 选 **None**，Build command 留空，输出目录 `/`。
 
 :::caution[务必关闭 Branch Preview]
 把 **Branch Preview 设为 None**（或只勾 `main`），否则每次上传图片推送到 `images` 分支都会触发构建，很快耗尽每月 500 次的免费额度。
 :::
+
+## 人机验证（可选）
+
+防止脚本批量刷上传接口，基于 Cloudflare Turnstile。**只保护上传，不保护 `/v2/`** —— 那是出图用的，加了验证图就无法外链了。
+
+### 为什么需要两处配置
+
+| 配置 | 位置 | 作用 |
+|---|---|---|
+| widget 的 domains | Turnstile 控制台 | 哪些域名**能签发** token |
+| `TURNSTILE_HOSTNAMES` | 环境变量 | 只接受**为你签发**的 token |
+
+两处都要配。只配控制台是不够的：任何人都能自己建一个 widget（域名填他自己的），通过挑战后把 token 提交给你的接口，Cloudflare 会如实回答 `success=true` —— 那确实是真的 token，只是不是为你签发的。所以后端必须比对 `hostname`。
+
+### 一次验证放行整批
+
+Turnstile token 是**一次性**的，无法在多张图之间复用。所以由后端签发凭证解决：
+
+```text
+第 1 张    ──带 token──> siteverify ──通过──> 签发 HMAC 凭证（10 分钟）
+第 2..N 张 ──带凭证──> 校验签名与有效期 ──通过──> 写入 GitHub
+```
+
+凭证用 `TURNSTILE_SECRET` 做 HMAC-SHA256 签名，无法伪造 —— 攻击者仍须先通过一次真实验证才能拿到。批次结束后前端重置组件，下次批量需重新验证一次。
+
+未配置 `TURNSTILE_SECRET` 时行为不变（完全放行），可随时启用或停用 —— 万一验证出问题，删掉这个变量就能立刻恢复。
 
 ## 部署前自检
 
@@ -130,6 +175,7 @@ python3 scripts/verify_upload.py
 | Cloudflare 免费额度 | 请求 10 万/天，构建 500 次/月 |
 | 仓库体积 | 建议控制在 1GB 以内 |
 | 国内访问 | 可设 `IMG_CDN=jsdelivr` 改走 jsDelivr 回源 |
+| 外部依赖 | 启用人机验证后会加载 `challenges.cloudflare.com` 脚本（验证的必要条件）。其余资源全部本地 |
 
 ## 技术栈
 
@@ -138,6 +184,7 @@ python3 scripts/verify_upload.py
 | 页面 | 原生 HTML + JavaScript，无框架、无构建 |
 | 组件 | [mdui 2](https://www.mdui.org/)（Web Components） |
 | 图标 | Material Icons 字体（本地自托管） |
+| 人机验证 | Cloudflare Turnstile（可选，仅保护上传接口） |
 | 后端 | Cloudflare Pages Functions |
 
 ## 许可
