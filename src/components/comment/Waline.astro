@@ -61,11 +61,12 @@ const uploader = walineCfg?.imageUploader
         });
       };
 
-      // 验证弹窗：懒创建，复用同一个节点
-      let mask = null;
+      // 验证弹窗：每次新建，用完彻底销毁
+      // 不复用节点——Turnstile 渲染出的 iframe 与挑战弹窗并不都留在容器里，
+      // 仅靠隐藏容器清不掉，必须移除节点并调用 turnstile.remove() 注销实例
       const buildMask = () => {
         const el = document.createElement("div");
-        el.className = "waline-ts-mask";
+        el.className = "waline-ts-mask is-open";
         el.innerHTML =
           '<div class="waline-ts-box">' +
           '<div class="waline-ts-title">上传前请先完成人机验证</div>' +
@@ -76,11 +77,30 @@ const uploader = walineCfg?.imageUploader
         return el;
       };
 
+      /**
+       * 彻底销毁弹窗
+       * 顺序：先注销 widget 实例，再移除节点。
+       * 延后一帧执行，避开 Turnstile 自身收尾（挑战窗口的关闭动画），
+       * 否则可能与它的清理逻辑竞争，反而留下残影。
+       */
+      const destroyMask = (ts, mask) => {
+        const mount = mask && mask.querySelector(".waline-ts-widget");
+        if (mount && ts && typeof ts.remove === "function") {
+          try {
+            ts.remove(mount);
+          } catch {
+            /* 已移除或尚未渲染完成，忽略 */
+          }
+        }
+        setTimeout(() => {
+          if (mask && mask.parentNode) mask.remove();
+        }, 0);
+      };
+
       // 渲染 widget 并等待用户完成验证
-      const requestToken = (ts) =>
+      const requestToken = (ts, mask) =>
         new Promise((resolve, reject) => {
           const mount = mask.querySelector(".waline-ts-widget");
-          mount.innerHTML = "";
           let settled = false;
           ts.render(mount, {
             sitekey: TURNSTILE_SITEKEY,
@@ -105,13 +125,13 @@ const uploader = walineCfg?.imageUploader
         if (!turnstilePass) {
           if (!TURNSTILE_SITEKEY) throw new Error("未配置人机验证 sitekey");
           const ts = await loadTurnstile();
-          if (!mask) mask = buildMask();
-          mask.classList.add("is-open");
+          const mask = buildMask();
           let token;
           try {
-            token = await requestToken(ts);
+            token = await requestToken(ts, mask);
           } finally {
-            mask.classList.remove("is-open");
+            // 无论成功失败都销毁，避免残留
+            destroyMask(ts, mask);
           }
 
           const fd = new FormData();
