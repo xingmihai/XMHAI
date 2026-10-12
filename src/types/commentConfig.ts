@@ -37,6 +37,12 @@ export type CommentConfig = {
 			fieldName?: string;
 			/** 从响应 JSON 中取图片链接的路径，如 "data.link"，默认直接取 "link" */
 			responsePath?: string;
+			/**
+			 * Cloudflare Turnstile sitekey
+			 * 图床开启人机验证时必填：上传前会弹窗要求完成验证
+			 * 需在 Turnstile 控制台把博客域名加入该 widget 的允许域名
+			 */
+			sitekey?: string;
 		};
 	};
 	artalk?: {

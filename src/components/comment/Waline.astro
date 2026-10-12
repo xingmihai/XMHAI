@@ -23,6 +23,7 @@ const uploader = walineCfg?.imageUploader
 			url: walineCfg.imageUploader.url,
 			fieldName: walineCfg.imageUploader.fieldName ?? "file",
 			responsePath: walineCfg.imageUploader.responsePath ?? "link",
+			sitekey: walineCfg.imageUploader.sitekey ?? "",
 		}
 	: null;
 ---
@@ -36,24 +37,119 @@ const uploader = walineCfg?.imageUploader
     const effectiveConfig = { ...config, path: requestedPath || config.path };
 
     // 评论贴图：上传到自建图床，返回可直接插入评论的图片链接
+    // 图床开启了 Turnstile 人机验证，因此上传前需先取得 token。
+    // 后端会签发 10 分钟有效的批次凭证，同一批多张图只需验证一次。
     if (uploader) {
-      effectiveConfig.imageUploader = (file) => {
-        const body = new FormData();
-        body.append(uploader.fieldName, file);
-        return fetch(uploader.url, { method: "POST", body })
-          .then((res) => {
-            if (!res.ok) throw new Error("上传接口返回 " + res.status);
-            return res.json();
-          })
-          .then((data) => {
-            const link = uploader.responsePath
-              .split(".")
-              .reduce((obj, key) => (obj == null ? obj : obj[key]), data);
-            if (typeof link !== "string" || !link) {
-              throw new Error("上传接口未返回图片链接");
-            }
-            return link;
+      const TURNSTILE_SITEKEY = uploader.sitekey;
+      let turnstilePass = ""; // 批次凭证，有效期内复用，免去重复验证
+
+      const loadTurnstile = () => {
+        if (window.turnstile) return Promise.resolve(window.turnstile);
+        return new Promise((resolve, reject) => {
+          const s = document.createElement("script");
+          // explicit：手动调用 render，便于在弹窗里按需创建
+          s.src =
+            "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
+          s.async = true;
+          s.defer = true;
+          s.onload = () => {
+            if (window.turnstile) resolve(window.turnstile);
+            else reject(new Error("人机验证组件未就绪，请刷新页面重试"));
+          };
+          s.onerror = () => reject(new Error("人机验证组件加载失败，请检查网络"));
+          document.head.appendChild(s);
+        });
+      };
+
+      // 验证弹窗：懒创建，复用同一个节点
+      let mask = null;
+      const buildMask = () => {
+        const el = document.createElement("div");
+        el.className = "waline-ts-mask";
+        el.innerHTML =
+          '<div class="waline-ts-box">' +
+          '<div class="waline-ts-title">上传前请先完成人机验证</div>' +
+          '<div class="waline-ts-widget"></div>' +
+          '<div class="waline-ts-tip">验证通过后即可上传，短时间内再次贴图无需重复验证</div>' +
+          "</div>";
+        document.body.appendChild(el);
+        return el;
+      };
+
+      // 渲染 widget 并等待用户完成验证
+      const requestToken = (ts) =>
+        new Promise((resolve, reject) => {
+          const mount = mask.querySelector(".waline-ts-widget");
+          mount.innerHTML = "";
+          let settled = false;
+          ts.render(mount, {
+            sitekey: TURNSTILE_SITEKEY,
+            theme: document.documentElement.classList.contains("dark")
+              ? "dark"
+              : "light",
+            callback: (token) => {
+              if (settled || !token) return;
+              settled = true;
+              resolve(token);
+            },
+            "error-callback": () => {
+              if (settled) return;
+              settled = true;
+              reject(new Error("人机验证组件出错，请重试"));
+            },
           });
+        });
+
+      effectiveConfig.imageUploader = async (file) => {
+        // 已有有效凭证则直接上传，不再弹验证
+        if (!turnstilePass) {
+          if (!TURNSTILE_SITEKEY) throw new Error("未配置人机验证 sitekey");
+          const ts = await loadTurnstile();
+          if (!mask) mask = buildMask();
+          mask.classList.add("is-open");
+          let token;
+          try {
+            token = await requestToken(ts);
+          } finally {
+            mask.classList.remove("is-open");
+          }
+
+          const fd = new FormData();
+          fd.append(uploader.fieldName, file);
+          fd.append("cf-turnstile-response", token);
+          return send(fd);
+        }
+
+        const fd = new FormData();
+        fd.append(uploader.fieldName, file);
+        fd.append("turnstile_pass", turnstilePass);
+        return send(fd);
+      };
+
+      const send = async (body) => {
+        const res = await fetch(uploader.url, { method: "POST", body });
+        // 先取文本：出错时图床可能返回 HTML 错误页，直接 json() 会误报成网络错误
+        const text = await res.text();
+        let data;
+        try {
+          data = JSON.parse(text);
+        } catch {
+          throw new Error("上传接口返回异常（非 JSON）：" + text.slice(0, 80));
+        }
+        if (!res.ok || data.success === false) {
+          throw new Error(data.error || "上传失败（HTTP " + res.status + "）");
+        }
+        // 保存批次凭证：后续上传免验证
+        if (data.data && data.data.turnstile_pass) {
+          turnstilePass = data.data.turnstile_pass;
+        }
+        const link = uploader.responsePath
+          .split(".")
+          .reduce((obj, key) => (obj == null ? obj : obj[key]), data);
+        if (typeof link !== "string" || !link) {
+          throw new Error("上传接口未返回图片链接");
+        }
+        return link;
       };
     }
 
@@ -81,5 +177,40 @@ const uploader = walineCfg?.imageUploader
   .wl-tabs .wl-tab:not(.active) {
     border: solid transparent;
     border-width: 0 1px 1px;
+  }
+
+  /* 评论贴图的人机验证弹窗 */
+  .waline-ts-mask {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgb(0 0 0 / 45%);
+    backdrop-filter: blur(4px);
+  }
+  .waline-ts-mask.is-open {
+    display: flex;
+  }
+  .waline-ts-box {
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--line-color, #e5e7eb);
+    text-align: center;
+    max-width: 90vw;
+  }
+  .waline-ts-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--text-color, #333);
+  }
+  .waline-ts-tip {
+    margin-top: 0.875rem;
+    font-size: 0.75rem;
+    line-height: 1.5;
+    color: var(--text-color-light, #999);
   }
 </style>

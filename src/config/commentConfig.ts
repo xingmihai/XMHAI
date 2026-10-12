@@ -47,6 +47,9 @@ export const commentConfig: CommentConfig = {
 			fieldName: "file",
 			// 响应形如 { success, data: { link } }，取 data.link
 			responsePath: "data.link",
+			// Cloudflare Turnstile sitekey，用于上传前的人机验证
+			// 需在 Turnstile 控制台把博客域名加入该 widget 的允许域名列表
+			sitekey: "0x4AAAAAAFUKaXfCncBNv71l",
 		},
 	},
 
