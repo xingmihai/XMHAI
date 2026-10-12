@@ -1,0 +1,67 @@
+---
+// 友链页面的随机排序
+//
+// 为什么放在 Layout 里常驻，而不是写在 friends.astro 页面内：
+// Swup 做无刷新切换时只替换容器内容，新页面里的脚本不会被执行。
+// 若写在页面内，从其他页面切换到友链页时脚本根本不会运行，
+// 卡片会停留在构建时的顺序（并因 pending 类而不可见）。
+// 因此改为常驻脚本 + 监听 swup:content:replace，与 GithubCardManager 一致。
+---
+
+<script>
+	// 每次页面加载都重新打乱友链顺序，让每个站点曝光机会均等。
+	// 只在首次加载时打乱一次：搜索与标签筛选仅切换卡片的显示/隐藏，
+	// 不改动 DOM 顺序，因此来回切换时相对顺序保持稳定。
+	const shuffleCards = () => {
+		const grid = document.getElementById("friends-grid");
+		if (!grid) return;
+
+		// 未开启随机排序时，只需确保网格可见
+		if (grid.dataset.shuffle !== "true") {
+			grid.classList.remove("friends-grid--pending");
+			return;
+		}
+
+		// 同一个节点只打乱一次，避免 DOMContentLoaded 与切换事件重复触发
+		if (grid.dataset.shuffleState) return;
+		grid.dataset.shuffleState = "pending";
+
+		const cards = Array.from(grid.querySelectorAll(".friend-card"));
+		if (cards.length < 2) {
+			grid.classList.remove("friends-grid--pending");
+			grid.dataset.shuffleState = "done";
+			return;
+		}
+
+		// Fisher-Yates 洗牌
+		for (let i = cards.length - 1; i > 0; i--) {
+			const j = Math.floor(Math.random() * (i + 1));
+			const tmp = cards[i];
+			cards[i] = cards[j];
+			cards[j] = tmp;
+		}
+
+		const frag = document.createDocumentFragment();
+		cards.forEach((card) => {
+			frag.appendChild(card);
+		});
+		grid.appendChild(frag);
+
+		grid.classList.remove("friends-grid--pending");
+		grid.dataset.shuffleState = "done";
+	};
+
+	const init = () => {
+		shuffleCards();
+		// Swup 无刷新切换后，新页面的内容已插入但脚本不会执行，需在此重新打乱
+		document.addEventListener("swup:content:replace", () => {
+			requestAnimationFrame(shuffleCards);
+		});
+	};
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", init);
+	} else {
+		init();
+	}
+</script>

@@ -7,6 +7,7 @@ import CircleManager from "@components/features/CircleManager.astro";
 import CodeGroupManager from "@components/features/CodeGroupManager.astro";
 import FancyboxManager from "@components/features/FancyboxManager.astro";
 import FontSetup from "@components/features/FontSetup.astro";
+import FriendsShuffleManager from "@components/features/FriendsShuffleManager.astro";
 import GithubCardManager from "@components/features/GithubCardManager.astro";
 import MusicManager from "@components/features/MusicManager.astro";
 import MusicPlayerView from "@components/features/MusicPlayerView.astro";
@@ -582,6 +583,9 @@ const ogImageAlt = propsOgImageAlt ?? pageTitle;
 
     <!-- 圈子页面的运行时数据加载（需在 Swup 切换后重新触发） -->
     <CircleManager />
+
+    <!-- 友链页面的随机排序（需在 Swup 切换后重新触发） -->
+    <FriendsShuffleManager />
   </body>
 </html>
 
