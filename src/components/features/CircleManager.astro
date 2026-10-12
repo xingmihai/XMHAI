@@ -1,0 +1,251 @@
+---
+// 圈子页面的运行时数据加载
+//
+// 为什么放在 Layout 里常驻，而不是写在 circle.astro 页面内：
+// Swup 做无刷新切换时只替换容器内容，新页面里的脚本不会被执行。
+// 若把脚本写在页面内，从其他页面切换到圈子时它根本不会运行，
+// 页面就会一直停在「正在获取最新文章…」。
+// 因此改为常驻脚本 + 监听 swup:content:replace，与 GithubCardManager 一致。
+---
+
+<script>
+	// 数据由独立仓库 circle-feed 定时抓取后发布，页面运行时读取
+	// 这样更新文章数据无需重建本站
+
+	const circleStateKey = "circleState";
+
+	const escapeHtml = (text) =>
+		String(text == null ? "" : text)
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
+
+	const pad = (n) => String(n).padStart(2, "0");
+
+	// 文章日期：YYYY-MM-DD
+	const formatDate = (timestamp) => {
+		if (!timestamp) return "";
+		const d = new Date(timestamp);
+		if (Number.isNaN(d.getTime())) return "";
+		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+	};
+
+	// 数据更新时间：YYYY-MM-DD HH:mm
+	const formatUpdated = (iso) => {
+		if (!iso) return "";
+		const d = new Date(iso);
+		if (Number.isNaN(d.getTime())) return "";
+		return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+	};
+
+	const renderEmpty = (root, text, hint) => {
+		root.innerHTML =
+			'<div class="flex flex-col items-center justify-center py-14 text-neutral-400 dark:text-neutral-500">' +
+			'<div class="text-4xl mb-3">📭</div>' +
+			'<div class="text-sm">' +
+			escapeHtml(text) +
+			"</div>" +
+			(hint
+				? '<div class="text-xs mt-1.5 opacity-70">' + escapeHtml(hint) + "</div>"
+				: "") +
+			"</div>";
+	};
+
+	const render = (root, data) => {
+		const items = (data && data.items) || [];
+		const sources = (data && data.sources) || [];
+		const failures = (data && data.failures) || [];
+		const updated = formatUpdated(data && data.updatedAt);
+
+		let html = "";
+
+		// 订阅源概览
+		if (sources.length > 0) {
+			html += '<div class="flex flex-wrap items-center gap-2 mb-5">';
+			html +=
+				'<span class="text-sm text-neutral-500 dark:text-neutral-400">已订阅 ' +
+				sources.length +
+				" 个站点" +
+				(updated ? " · 更新于 " + escapeHtml(updated) : "") +
+				"</span>";
+			sources.forEach((s) => {
+				html +=
+					'<a href="' +
+					escapeHtml(s.site) +
+					'" target="_blank" rel="noopener noreferrer"' +
+					' class="circle-source-chip inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs transition-colors duration-200">';
+				if (s.avatar) {
+					html +=
+						'<img src="' +
+						escapeHtml(s.avatar) +
+						'" alt="' +
+						escapeHtml(s.name) +
+						'" class="circle-source-avatar" />';
+				}
+				html += "<span>" + escapeHtml(s.name) + "</span>";
+				if (s.ok === false) {
+					html += '<span class="opacity-60" title="该站点未能抓到内容">·</span>';
+				}
+				html += "</a>";
+			});
+			html += "</div>";
+		}
+
+		// 抓取失败的站点
+		if (failures.length > 0) {
+			html += '<details class="circle-failures mb-5 text-xs">';
+			html +=
+				'<summary class="cursor-pointer text-neutral-500 dark:text-neutral-400 hover:text-(--primary) transition-colors duration-200">' +
+				failures.length +
+				" 个站点未能抓到内容</summary>";
+			html += '<ul class="mt-2 space-y-1 pl-1">';
+			failures.forEach((f) => {
+				html +=
+					'<li class="text-neutral-400 dark:text-neutral-500"><span class="font-medium">' +
+					escapeHtml(f.name) +
+					'</span><span class="opacity-70"> — ' +
+					escapeHtml(f.error) +
+					"</span></li>";
+			});
+			html += "</ul></details>";
+		}
+
+		// 访客提示：没看到自己的文章该怎么办
+		html += '<details class="circle-failures mb-5 text-xs">';
+		html +=
+			'<summary class="cursor-pointer text-neutral-500 dark:text-neutral-400 hover:text-(--primary) transition-colors duration-200">' +
+			"没看到自己的文章？</summary>";
+		html +=
+			'<div class="mt-2 pl-1 space-y-1.5 text-neutral-400 dark:text-neutral-500 leading-relaxed">';
+		html += "<div>这里只收录友链中的站点，先看看你的博客是否在列：</div>";
+		html +=
+			'<div><a href="/friends/" class="text-(--primary) hover:underline">前往友链页面查看 →</a></div>';
+		html += '<div class="mt-2">如果已在友链里，可能的原因：</div>';
+		html += '<ul class="list-disc pl-4 space-y-1">';
+		html +=
+			"<li>站点没有开启 RSS / Atom 订阅，或订阅源地址比较特殊，自动探测找不到</li>";
+		html += "<li>每个站点只显示最新的几篇文章，更早的不会出现在列表里</li>";
+		html +=
+			"<li>数据每 6 小时自动刷新一次，刚发布的文章最多需要等这么久才会出现</li>";
+		html += "</ul>";
+		html +=
+			'<div class="mt-2">想加入收录或反馈问题，可通过友链页面上的联系方式与站长沟通。</div>';
+		html += "</div></details>";
+
+		// 文章列表
+		if (items.length > 0) {
+			html += '<div class="circle-list">';
+			items.forEach((item) => {
+				const date = formatDate(item.timestamp);
+				html +=
+					'<a href="' +
+					escapeHtml(item.link) +
+					'" target="_blank" rel="noopener noreferrer"' +
+					' class="circle-item group flex items-start gap-3 py-3.5 px-3 -mx-3 rounded-xl transition-all duration-200">';
+				if (item.sourceAvatar) {
+					html +=
+						'<img src="' +
+						escapeHtml(item.sourceAvatar) +
+						'" alt="' +
+						escapeHtml(item.sourceName) +
+						'" class="circle-item-avatar" />';
+				} else {
+					html +=
+						'<div class="circle-item-avatar circle-item-avatar--placeholder">📡</div>';
+				}
+				html += '<div class="grow min-w-0">';
+				html +=
+					'<div class="circle-item-title group-hover:text-(--primary) transition-colors duration-200 line-clamp-2">' +
+					escapeHtml(item.title) +
+					"</div>";
+				html +=
+					'<div class="flex items-center gap-2 mt-1 text-xs text-neutral-500 dark:text-neutral-400">';
+				html +=
+					'<span class="truncate max-w-[14rem]">' +
+					escapeHtml(item.sourceName) +
+					"</span>";
+				if (date) {
+					html +=
+						'<span aria-hidden="true">·</span><time class="shrink-0">' +
+						escapeHtml(date) +
+						"</time>";
+				}
+				html += "</div></div>";
+				html +=
+					'<span class="shrink-0 text-base text-(--primary) opacity-0 group-hover:opacity-100 transition-opacity duration-200 mt-0.5">↗</span>';
+				html += "</a>";
+			});
+			html += "</div>";
+		} else {
+			html +=
+				'<div class="flex flex-col items-center justify-center py-14 text-neutral-400 dark:text-neutral-500">' +
+				'<div class="text-sm">还没有抓到任何文章</div>' +
+				'<div class="text-xs mt-1.5 opacity-70">可在数据源仓库里检查订阅源配置与抓取日志</div>' +
+				"</div>";
+		}
+
+		root.innerHTML = html;
+	};
+
+	const loadCircle = async () => {
+		const root = document.getElementById("circle-root");
+		if (!root) return;
+
+		// 同一个节点只加载一次，避免 DOMContentLoaded 与切换事件重复触发
+		if (root.dataset[circleStateKey]) return;
+		root.dataset[circleStateKey] = "loading";
+
+		const urls = (root.dataset.urls || "")
+			.split("|")
+			.map((u) => u.trim())
+			.filter(Boolean)
+			.filter((u, i, arr) => arr.indexOf(u) === i);
+
+		if (urls.length === 0) {
+			root.dataset[circleStateKey] = "done";
+			renderEmpty(
+				root,
+				"还没有配置数据源",
+				"请在 circleConfig 的 dataUrls 中填入数据源地址",
+			);
+			return;
+		}
+
+		// 依次尝试，取第一个可用的数据源
+		for (const url of urls) {
+			try {
+				const res = await fetch(url, { cache: "no-store" });
+				if (!res.ok) continue;
+				const data = await res.json();
+				render(root, data);
+				root.dataset[circleStateKey] = "done";
+				return;
+			} catch {
+				// 换下一个源继续尝试
+			}
+		}
+
+		root.dataset[circleStateKey] = "done";
+		renderEmpty(
+			root,
+			"没能读到圈子数据",
+			"可到数据源仓库的 Actions 里手动运行一次 Update and Deploy",
+		);
+	};
+
+	const init = () => {
+		loadCircle();
+		// Swup 无刷新切换后，新页面的内容已插入但脚本不会执行，需在此重新加载
+		document.addEventListener("swup:content:replace", () => {
+			requestAnimationFrame(loadCircle);
+		});
+	};
+
+	if (document.readyState === "loading") {
+		document.addEventListener("DOMContentLoaded", init);
+	} else {
+		init();
+	}
+</script>
