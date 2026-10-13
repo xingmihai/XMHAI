@@ -47,14 +47,14 @@ export const siteConfig: SiteConfig = {
 	title: "星觅海",
 
 	// 站点副标题
-	subtitle: "记录生活与技术的小站",
+	subtitle: "记录生活与技术",
 
 	// 站点 URL
 	site_url: "https://www.5al.top",
 
 	// 站点描述
 	description:
-		"星觅海的个人博客，记录技术与生活的小站。",
+		"星觅海的个人博客，记录技术与生活。",
 
 	// 站点关键词
 	keywords: [
