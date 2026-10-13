@@ -8,7 +8,6 @@ tags: [十年之约]
 category: 十年之约
 pinned: false
 series: "生活记录"
-seriesOrder: 3
 ---
 
 ## 十年之约
