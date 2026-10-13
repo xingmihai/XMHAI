@@ -7,6 +7,8 @@ image: /assets/images/ten_year_promise.svg
 tags: [十年之约]
 category: 十年之约
 pinned: false
+series: "生活记录"
+seriesOrder: 3
 ---
 
 ## 十年之约
