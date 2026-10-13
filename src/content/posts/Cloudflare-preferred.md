@@ -7,6 +7,8 @@ image: /assets/images/cloudflare-cover.svg
 tags: [Cloudflare, 教程]
 category: ""
 pinned: false
+series: "Cloudflare"
+seriesOrder: 2
 ---
 
 > 用我的两个域名来演示
