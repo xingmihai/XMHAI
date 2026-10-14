@@ -112,6 +112,12 @@ const getDynamicNavBarConfig = (): NavBarConfig => {
 				external: true,
 				icon: "material-symbols:image-outline",
 			},
+			{
+				name: "服务状态",
+				url: "https://status.5al.top",
+				external: true,
+				icon: "material-symbols:monitor-heart",
+			},
 		],
 	});
 
