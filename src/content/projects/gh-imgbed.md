@@ -113,14 +113,21 @@ git push -u origin images
 | `GITHUB_OWNER` | 存图仓库的所有者用户名 | ✅ |
 | `GITHUB_REPO` | 存图仓库名 | ✅ |
 | `GITHUB_PATH` | 仓库内子目录，留空则存根目录 | 可选 |
+| `IMG_CDN` | 设为 `jsdelivr` 可改走 jsDelivr 回源 | 可选 |
 | `TURNSTILE_SECRET` | Turnstile 的 **Secret Key**（不是 Site Key） | 可选 |
 | `TURNSTILE_HOSTNAMES` | 实际访问用的完整主机名，逗号分隔 | 启用验证时必填 |
 
+:::caution[启用验证前，先换掉前端的 Site Key]
+`assets/app.js` 顶部的 `TURNSTILE_SITEKEY` 是**本项目作者的**，直接部署不会生效 ——
+该 widget 的 domains 白名单里没有你的域名，验证组件会渲染失败。它与 `TURNSTILE_SECRET`
+必须来自**同一个 widget**，跨 widget 混用同样会报 `invalid-input-secret`。
+:::
+
 > Turnstile 的 Site Key 和 Secret Key **长得几乎一样**（都以 `0x4AAAAAAA` 开头），
-> 极易填错。Site Key 已写在 `index.html` 里（公开无妨），Secret Key 只能进环境变量。
+> 极易填错。Site Key 写在 `assets/app.js` 里（公开无妨），Secret Key 只能进环境变量。
 >
 > `TURNSTILE_HOSTNAMES` 必须是**完整主机名**（如 `img.5al.top`，不能只写 `5al.top`），
-> 且与 Turnstile 控制台里该 widget 的 domains **完全一致**。
+> 且与 Turnstile 控制台里该 widget 的 domains **完全一致**。生产环境不要含 `localhost`。
 
 Pages 构建设置：Framework preset 选 **None**，Build command 留空，输出目录 `/`。
 
@@ -164,6 +171,23 @@ python3 scripts/verify_upload.py
 ```
 
 脚本会依次检查令牌有效性、仓库可访问性、写入权限、链接可访问性，并自动清理测试文件。
+
+## 日常维护
+
+- **删除单张图片** — 用上传响应里的 `sha` 调 GitHub Contents API 的 DELETE，或在网页上直接删。注意边缘缓存最长保留 1 年，需立即生效要手动清缓存。
+- **更换令牌** — 重新生成后更新 `GITHUB_TOKEN` 环境变量并重新部署。
+- **仓库满了** — 新建仓库与 `images` 孤儿分支，改 `GITHUB_REPO` 后重新部署。旧链接会失效。
+
+## 常见问题
+
+| 现象 | 原因与处理 |
+|---|---|
+| 上传返回 403 | 令牌缺 `Contents` 读写，或 Repository access 没包含该仓库 |
+| 上传返回 422 | 同名文件冲突，代码会自动换名重试 6 次；仍失败则检查分支是否存在 |
+| 多选时部分失败提示「网络错误」 | 并发做多次 base64 编码可能超出免费额度限制。默认已串行（`CONCURRENCY = 1`），仍失败就一次少选几张 |
+| 图片上传了但打不开 | 确认 `images` 分支存在且文件确实写入 |
+| 刷新后上传历史没了 | 历史存 localStorage，**按域名隔离**，换域名后读不到是浏览器行为 |
+| 图标显示为 `cloud_upload` 这样的英文 | Material Icons 字体没加载，确认 `assets/fonts/*.woff2` 能访问 |
 
 ## 已知限制
 
